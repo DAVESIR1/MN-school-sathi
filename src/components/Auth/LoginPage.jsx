@@ -120,11 +120,6 @@ export default function LoginPage() {
                     <p>Manage your school records securely</p>
                 </div>
 
-                {/* Demo Login Hint */}
-                <div className="demo-hint">
-                    <strong>Demo Login:</strong> baraiyanitin220@gmail.com / Admin@12345<br />
-                    <small>Phone OTP Demo Code: 123456</small>
-                </div>
 
                 {/* Auth Mode Tabs */}
                 <div className="auth-tabs">
