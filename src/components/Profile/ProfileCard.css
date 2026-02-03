@@ -1,0 +1,332 @@
+.profile-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-large);
+    overflow: hidden;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Header */
+.profile-header {
+    display: grid;
+    grid-template-columns: 100px 1fr 100px;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-6);
+    background: linear-gradient(135deg, var(--pastel-lavender) 0%, var(--pastel-pink) 100%);
+    border-bottom: 3px solid rgba(255, 255, 255, 0.5);
+}
+
+.header-left,
+.header-right {
+    display: flex;
+    justify-content: center;
+}
+
+.school-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: var(--radius-lg);
+    background: var(--white);
+    padding: var(--space-2);
+    box-shadow: var(--shadow-soft);
+}
+
+.school-logo-placeholder {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+}
+
+.header-center {
+    text-align: center;
+}
+
+.school-name {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--gray-800);
+    margin: 0 0 var(--space-1);
+}
+
+.profile-title {
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--gray-600);
+    margin: 0 0 var(--space-1);
+}
+
+.school-contact {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.student-photo {
+    width: 90px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 3px solid var(--white);
+    box-shadow: var(--shadow-soft);
+}
+
+.student-photo-placeholder {
+    width: 90px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    background: var(--gray-100);
+    border: 3px solid var(--white);
+    border-radius: var(--radius-lg);
+    color: var(--gray-400);
+}
+
+/* Body */
+.profile-body {
+    padding: var(--space-4);
+}
+
+.profile-section {
+    margin-bottom: var(--space-4);
+    padding: var(--space-4);
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin: 0 0 var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--pastel-lavender);
+}
+
+.section-icon {
+    font-size: 1.2rem;
+}
+
+.section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-3);
+}
+
+.field-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.field-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.field-value {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--gray-800);
+    padding: var(--space-2);
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--gray-200);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+}
+
+/* Footer */
+.profile-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-6);
+    background: var(--gray-50);
+    border-top: 2px dashed var(--gray-200);
+}
+
+.signature-box {
+    text-align: center;
+    min-width: 200px;
+}
+
+.signature-line {
+    height: 1px;
+    background: var(--gray-400);
+    margin-bottom: var(--space-2);
+}
+
+.signature-label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* ===== TEMPLATE STYLES ===== */
+
+/* Classic */
+.template-classic .profile-header {
+    background: linear-gradient(135deg, #f5f0ff 0%, #e8e0f0 100%);
+}
+
+.template-classic .section-title {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+/* Modern */
+.template-modern {
+    border: none;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.template-modern .profile-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.template-modern .school-name,
+.template-modern .profile-title {
+    color: var(--white);
+}
+
+.template-modern .school-contact {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Colorful */
+.template-colorful .profile-header {
+    background: linear-gradient(135deg,
+            var(--pastel-pink) 0%,
+            var(--pastel-lavender) 25%,
+            var(--pastel-sky) 50%,
+            var(--pastel-mint) 75%,
+            var(--pastel-lemon) 100%);
+}
+
+.template-colorful .profile-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.5) 100%);
+}
+
+/* Professional */
+.template-professional {
+    border: 2px solid var(--gray-300);
+}
+
+.template-professional .profile-header {
+    background: linear-gradient(180deg, var(--gray-100) 0%, var(--white) 100%);
+}
+
+.template-professional .section-title {
+    color: var(--gray-700);
+    border-color: var(--gray-300);
+}
+
+/* Vintage */
+.template-vintage {
+    background: #faf8f3;
+}
+
+.template-vintage .profile-header {
+    background: linear-gradient(135deg, #f4e4c7 0%, #e8d5b5 100%);
+}
+
+.template-vintage .profile-section {
+    background: rgba(244, 228, 199, 0.3);
+    border-color: #d4c4a8;
+}
+
+/* Nature */
+.template-nature .profile-header {
+    background: linear-gradient(135deg, var(--pastel-mint) 0%, #a8e6cf 100%);
+}
+
+.template-nature .section-title {
+    color: #2d5a3d;
+    border-color: var(--pastel-mint-dark);
+}
+
+/* Space */
+.template-space {
+    background: linear-gradient(180deg, #0d1b2a 0%, #1b263b 100%);
+    color: var(--white);
+}
+
+.template-space .profile-header {
+    background: linear-gradient(135deg, #1b263b 0%, #415a77 100%);
+}
+
+.template-space .school-name,
+.template-space .profile-title,
+.template-space .section-title {
+    color: var(--white);
+}
+
+.template-space .section-title {
+    border-color: #778da9;
+}
+
+.template-space .profile-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.template-space .field-label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.template-space .field-value {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Rainbow */
+.template-rainbow .profile-header {
+    background: linear-gradient(90deg,
+            #ff9a9e 0%,
+            #fad0c4 20%,
+            #ffecd2 40%,
+            #a1ffce 60%,
+            #a8edea 80%,
+            #d299c2 100%);
+}
+
+/* Print Styles */
+@media print {
+    .profile-card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        max-width: none;
+    }
+
+    .profile-header {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .section-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

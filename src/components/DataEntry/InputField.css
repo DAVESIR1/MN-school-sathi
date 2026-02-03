@@ -1,0 +1,191 @@
+.input-group {
+    position: relative;
+    transition: all var(--transition-base);
+}
+
+.input-group.focused .input-label {
+    color: var(--primary-dark);
+}
+
+.input-group.focused .input-field {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(212, 181, 255, 0.3), var(--shadow-inset);
+}
+
+.textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* File Upload */
+.file-upload-area {
+    width: 100%;
+}
+
+.upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-6);
+    background: linear-gradient(135deg, var(--pastel-lavender-light) 0%, var(--pastel-sky-light) 100%);
+    border: 2px dashed var(--primary);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+.upload-label:hover {
+    background: linear-gradient(135deg, var(--pastel-lavender) 0%, var(--pastel-sky) 100%);
+    border-style: solid;
+    transform: scale(1.02);
+}
+
+.file-input {
+    display: none;
+}
+
+.file-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.preview-image {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    object-fit: cover;
+}
+
+.clear-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pastel-coral);
+    border: 2px solid var(--white);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.clear-btn:hover {
+    background: var(--pastel-coral-dark);
+    transform: scale(1.1);
+}
+
+/* Documents Vault */
+.documents-vault {
+    grid-column: 1 / -1;
+}
+
+.documents-vault .input-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.doc-count {
+    margin-left: auto;
+}
+
+.documents-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+}
+
+.doc-icon {
+    font-size: 1.2rem;
+}
+
+.doc-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.doc-size {
+    font-size: var(--text-xs);
+    color: var(--gray-400);
+}
+
+.doc-action-btn {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.doc-action-btn.view {
+    background: var(--pastel-sky-light);
+    color: var(--gray-700);
+}
+
+.doc-action-btn.view:hover {
+    background: var(--pastel-sky);
+}
+
+.doc-action-btn.remove {
+    background: var(--pastel-coral-light);
+    color: var(--gray-700);
+}
+
+.doc-action-btn.remove:hover {
+    background: var(--pastel-coral);
+}
+
+.upload-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    margin-top: var(--space-3);
+    background: linear-gradient(135deg, var(--pastel-mint-light) 0%, var(--pastel-lemon-light) 100%);
+    border: 2px dashed var(--pastel-mint-dark);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--gray-700);
+    transition: all var(--transition-base);
+}
+
+.upload-more-btn:hover {
+    background: linear-gradient(135deg, var(--pastel-mint) 0%, var(--pastel-lemon) 100%);
+    border-style: solid;
+}
+
+.upload-more-btn .file-input {
+    display: none;
+}

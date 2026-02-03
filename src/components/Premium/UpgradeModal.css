@@ -1,0 +1,312 @@
+/* ===== UPGRADE MODAL STYLES ===== */
+.upgrade-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    padding: var(--space-4);
+}
+
+.upgrade-modal {
+    position: relative;
+    background: var(--white);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: zoomIn 0.3s ease-out;
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.upgrade-close {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    z-index: 10;
+}
+
+.upgrade-close:hover {
+    background: var(--gray-100);
+    transform: rotate(90deg);
+}
+
+/* Header */
+.upgrade-header {
+    text-align: center;
+    padding: var(--space-8) var(--space-6) var(--space-6);
+    background: linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #f59e0b 100%);
+    color: white;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+}
+
+.crown-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--space-4);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.upgrade-header h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-2);
+}
+
+.upgrade-header p {
+    opacity: 0.9;
+    font-size: var(--text-sm);
+}
+
+/* Pricing Plans */
+.pricing-plans {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-5);
+    margin-top: -20px;
+}
+
+.plan-card {
+    position: relative;
+    background: var(--white);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--space-4);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-soft);
+}
+
+.plan-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+.plan-card.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.plan-badge {
+    position: absolute;
+    top: -10px;
+    right: -5px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+.plan-name {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--gray-500);
+    margin-bottom: var(--space-2);
+}
+
+.plan-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px;
+}
+
+.plan-price .currency {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--gray-700);
+}
+
+.plan-price .amount {
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    color: var(--gray-900);
+    font-family: var(--font-heading);
+}
+
+.plan-price .period {
+    font-size: var(--text-sm);
+    color: var(--gray-400);
+}
+
+/* Features */
+.premium-features {
+    padding: 0 var(--space-5) var(--space-4);
+}
+
+.premium-features h3 {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--space-3);
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-lg);
+    transition: background var(--transition-base);
+}
+
+.feature-item:hover {
+    background: var(--gray-50);
+}
+
+.feature-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.feature-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.feature-title {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: var(--gray-800);
+}
+
+.feature-desc {
+    font-size: var(--text-xs);
+    color: var(--gray-500);
+}
+
+.feature-check {
+    color: #10b981;
+    flex-shrink: 0;
+}
+
+/* CTA Button */
+.upgrade-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: calc(100% - var(--space-10));
+    margin: 0 var(--space-5) var(--space-4);
+    padding: var(--space-4);
+    background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-xl);
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
+}
+
+.upgrade-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 40px rgba(124, 58, 237, 0.5);
+}
+
+.upgrade-btn:disabled {
+    opacity: 0.8;
+    cursor: wait;
+}
+
+.upgrade-btn .spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Terms */
+.upgrade-terms {
+    text-align: center;
+    font-size: var(--text-xs);
+    color: var(--gray-400);
+    padding-bottom: var(--space-5);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .pricing-plans {
+        grid-template-columns: 1fr;
+    }
+
+    .upgrade-header {
+        padding: var(--space-6) var(--space-4);
+    }
+
+    .crown-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    .crown-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+}

@@ -1,0 +1,20 @@
+.data-step {
+    width: 100%;
+}
+
+.fields-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-6);
+}
+
+.field-wrapper {
+    animation-fill-mode: both;
+}
+
+@media (max-width: 640px) {
+    .fields-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+}

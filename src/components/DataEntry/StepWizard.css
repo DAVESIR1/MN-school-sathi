@@ -1,0 +1,133 @@
+.step-wizard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-card);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-large);
+    overflow: hidden;
+    position: relative;
+}
+
+.wizard-header {
+    padding: var(--space-6) var(--space-8);
+    background: linear-gradient(135deg, var(--pastel-lavender-light) 0%, var(--pastel-pink-light) 100%);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.wizard-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+}
+
+.wizard-icon {
+    font-size: 3rem;
+    display: inline-block;
+}
+
+.wizard-title h2 {
+    font-size: var(--text-3xl);
+    margin: 0;
+}
+
+.wizard-subtitle {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.wizard-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.wizard-progress .progress-bar {
+    flex: 1;
+    height: 10px;
+}
+
+.progress-text {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--gray-600);
+    min-width: 90px;
+    text-align: right;
+}
+
+.wizard-content {
+    flex: 1;
+    padding: var(--space-8);
+    overflow-y: auto;
+}
+
+.wizard-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-4) var(--space-8);
+    background: linear-gradient(0deg, var(--gray-50) 0%, transparent 100%);
+    border-top: 1px solid var(--gray-200);
+}
+
+.wizard-actions {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.success-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(181, 245, 216, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.success-content {
+    text-align: center;
+}
+
+.success-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+}
+
+.success-content h3 {
+    font-size: var(--text-2xl);
+    color: var(--gray-800);
+    margin-bottom: var(--space-2);
+}
+
+.success-content p {
+    color: var(--gray-600);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wizard-header {
+        padding: var(--space-4);
+    }
+
+    .wizard-content {
+        padding: var(--space-4);
+    }
+
+    .wizard-footer {
+        flex-direction: column;
+        gap: var(--space-3);
+        padding: var(--space-4);
+    }
+
+    .wizard-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .wizard-actions .btn {
+        width: 100%;
+    }
+}

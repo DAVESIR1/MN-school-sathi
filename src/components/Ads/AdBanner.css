@@ -1,0 +1,160 @@
+/* ===== AD BANNER STYLES ===== */
+.ad-banner {
+    position: relative;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ad-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: var(--space-4);
+    position: relative;
+}
+
+.ad-label {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    background: var(--gray-300);
+    color: var(--gray-600);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ad-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--space-2);
+}
+
+.ad-placeholder-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.ad-text {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--gray-500);
+}
+
+.ad-subtext {
+    font-size: var(--text-xs);
+    color: var(--gray-400);
+}
+
+.ad-upgrade-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+    padding: var(--space-1) var(--space-3);
+    background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.ad-upgrade-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+}
+
+.ad-close-btn {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    background: var(--gray-200);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gray-500);
+    transition: all var(--transition-base);
+}
+
+.ad-close-btn:hover {
+    background: var(--gray-300);
+    color: var(--gray-700);
+}
+
+/* Banner Type */
+.ad-banner.ad-banner {
+    min-height: 90px;
+}
+
+/* Sidebar Type */
+.ad-sidebar {
+    min-width: 160px;
+    min-height: 300px;
+}
+
+/* Leaderboard Type */
+.ad-leaderboard {
+    min-height: 90px;
+}
+
+/* Interstitial Type */
+.ad-interstitial {
+    min-height: 250px;
+    background: linear-gradient(135deg, #fdf4ff 0%, #fce7f3 100%);
+    border-color: var(--pastel-pink);
+}
+
+/* Positions */
+.ad-position-top {
+    margin-bottom: var(--space-4);
+}
+
+.ad-position-bottom {
+    margin-top: var(--space-4);
+}
+
+/* Ad Placement Container */
+.ad-placement {
+    width: 100%;
+    padding: var(--space-2) 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .ad-banner {
+        min-height: 70px;
+    }
+
+    .ad-text {
+        font-size: var(--text-xs);
+    }
+
+    .ad-upgrade-btn {
+        font-size: 10px;
+        padding: var(--space-1) var(--space-2);
+    }
+}
