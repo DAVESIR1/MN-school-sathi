@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.982.0",
     "firebase": "^12.8.0",
     "html2canvas": "^1.4.1",
     "idb": "^7.1.1",

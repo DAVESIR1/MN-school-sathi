@@ -4,11 +4,13 @@ import StepWizard, { DATA_FIELDS } from './components/DataEntry/StepWizard';
 import ProfileViewer from './components/Profile/ProfileViewer';
 import GeneralRegister from './components/Ledger/GeneralRegister';
 import BackupRestore from './components/Backup/BackupRestore';
-import DriveBackup from './components/Backup/DriveBackup';
+import CloudBackup from './components/Backup/CloudBackup';
 import LoginPage from './components/Auth/LoginPage';
 import AdminPanel from './components/Admin/AdminPanel';
 import CertificateGenerator from './components/Features/CertificateGenerator';
 import AnalyticsDashboard from './components/Features/AnalyticsDashboard';
+import QRAttendance from './components/Features/QRAttendance';
+import SmartSearch from './components/Features/SmartSearch';
 import { AdPlacement } from './components/Ads/AdBanner';
 import UpgradeModal from './components/Premium/UpgradeModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -23,6 +25,8 @@ import {
     useTheme
 } from './hooks/useDatabase';
 import * as db from './services/database';
+import * as LocalBackupService from './services/LocalBackupService';
+import * as MandatoryBackupService from './services/MandatoryBackupService';
 import { Menu, Users, FileSpreadsheet, Sparkles, Download, Share2, Maximize2, Minimize2 } from 'lucide-react';
 import './App.css';
 
@@ -41,10 +45,12 @@ function AppContent() {
     const [searchResults, setSearchResults] = useState([]);
     const [isFormMaximized, setIsFormMaximized] = useState(false);
     const [showBackup, setShowBackup] = useState(false);
-    const [showDriveBackup, setShowDriveBackup] = useState(false);
     const [showAdmin, setShowAdmin] = useState(false);
     const [showCertificate, setShowCertificate] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
+    const [showQRAttendance, setShowQRAttendance] = useState(false);
+    const [showSmartSearch, setShowSmartSearch] = useState(false);
+    const [showCloudBackup, setShowCloudBackup] = useState(false);
     const [backupAction, setBackupAction] = useState('export');
 
     // Hooks
@@ -84,6 +90,54 @@ function AppContent() {
         }
     }, [settings, settingsLoading]);
 
+    // Initialize mandatory backup system and sync on app load
+    useEffect(() => {
+        const initBackupSystem = async () => {
+            try {
+                // Initialize mandatory backup (periodic, unload, visibility)
+                MandatoryBackupService.initMandatoryBackup();
+
+                // Check if version changed (potential data loss scenario)
+                if (LocalBackupService.hasVersionChanged()) {
+                    console.log('App version changed - checking for data recovery...');
+                    // Try to restore from cloud/local backup
+                    const restoreResult = await MandatoryBackupService.restoreFromBackup(user?.uid);
+                    if (restoreResult.success) {
+                        console.log('Data restored from:', restoreResult.source);
+                    }
+                }
+
+                // Perform immediate full backup on app load (local + R2 cloud)
+                if (user?.uid) {
+                    await MandatoryBackupService.forceImmediateBackup(user.uid);
+                } else {
+                    // Anonymous backup for non-logged-in users
+                    const allData = await db.exportAllData();
+                    if (allData && (allData.students?.length > 0 || allData.settings)) {
+                        LocalBackupService.createLocalBackup(allData);
+                    }
+                }
+
+                // Save current version
+                LocalBackupService.saveAppVersion();
+
+                console.log('Mandatory backup system initialized');
+            } catch (error) {
+                console.error('Backup system init failed:', error);
+            }
+        };
+
+        // Run after app is ready
+        if (isReady) {
+            initBackupSystem();
+        }
+
+        // Cleanup on unmount
+        return () => {
+            MandatoryBackupService.cleanup();
+        };
+    }, [isReady, user?.uid]);
+
     // Save settings
     const handleSaveSettings = useCallback(async () => {
         await updateSetting('schoolName', schoolName);
@@ -92,6 +146,8 @@ function AppContent() {
         await updateSetting('schoolEmail', schoolEmail);
         await updateSetting('teacherName', teacherName);
         await updateSetting('selectedStandard', selectedStandard);
+        // Trigger backup after settings change
+        MandatoryBackupService.triggerBackupOnChange();
         alert('Settings saved successfully!');
     }, [schoolName, schoolLogo, schoolContact, schoolEmail, teacherName, selectedStandard, updateSetting]);
 
@@ -109,6 +165,8 @@ function AppContent() {
         }
         await refreshStudents();
         await refreshLedger();
+        // Trigger backup after student data change
+        MandatoryBackupService.triggerBackupOnChange();
     }, [addStudent, updateStudent, editingStudent, selectedStandard, refreshStudents, refreshLedger]);
 
     // Class upgrade
@@ -164,12 +222,9 @@ function AppContent() {
 
     // Share/Export - handles different backup actions
     const handleShare = useCallback((action) => {
-        if (action === 'backup' || action === 'restore') {
-            setShowDriveBackup(true);
-        } else {
-            setBackupAction(action); // 'export', 'import', or 'share'
-            setShowBackup(true);
-        }
+        // 'backup' and 'restore' actions handled via sidebar CloudBackup button
+        setBackupAction(action); // 'export', 'import', or 'share'
+        setShowBackup(true);
     }, []);
 
     // Import complete callback
@@ -304,6 +359,9 @@ function AppContent() {
                 onOpenUpgrade={() => setShowUpgradeModal(true)}
                 onOpenCertificate={() => setShowCertificate(true)}
                 onOpenAnalytics={() => setShowAnalytics(true)}
+                onOpenQRAttendance={() => setShowQRAttendance(true)}
+                onOpenSmartSearch={() => setShowSmartSearch(true)}
+                onOpenCloudBackup={() => setShowCloudBackup(true)}
             />
 
             {/* Main Content */}
@@ -470,12 +528,7 @@ function AppContent() {
                 initialTab={backupAction}
             />
 
-            {/* Google Drive Backup Modal */}
-            <DriveBackup
-                isOpen={showDriveBackup}
-                onClose={() => setShowDriveBackup(false)}
-                onRestore={handleImportComplete}
-            />
+
 
             {/* Admin Panel */}
             {showAdmin && (
@@ -502,6 +555,34 @@ function AppContent() {
                 students={students}
                 standards={standards}
                 ledger={ledger}
+            />
+
+            {/* QR Attendance */}
+            <QRAttendance
+                isOpen={showQRAttendance}
+                onClose={() => setShowQRAttendance(false)}
+                students={students}
+                schoolName={schoolName}
+            />
+
+            {/* Smart Search */}
+            <SmartSearch
+                isOpen={showSmartSearch}
+                onClose={() => setShowSmartSearch(false)}
+                students={students}
+                onSelectStudent={(student) => {
+                    setEditingStudent(student);
+                    setShowSmartSearch(false);
+                }}
+            />
+
+            {/* Cloud Backup */}
+            <CloudBackup
+                isOpen={showCloudBackup}
+                onClose={() => setShowCloudBackup(false)}
+                onRestoreComplete={() => {
+                    window.location.reload();
+                }}
             />
 
             {/* Ad Banner for Free Users */}

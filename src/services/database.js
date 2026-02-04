@@ -319,3 +319,7 @@ export async function importAllData(data) {
 
 // Alias for importAllData
 export const importData = importAllData;
+
+// Aliases for cloud backup service
+export const getAllStudentsForBackup = getAllStudents;
+export const getAllLedgerEntries = getLedger;

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { CERTIFICATE_TEMPLATES, getTemplatesByCategory, getCategories, getTemplateById } from './CertificateTemplates';
-import { Award, Printer, X, Download } from 'lucide-react';
+import { Award, Printer as PrinterIcon, X, Download } from 'lucide-react';
 import './CertificateGenerator.css';
 
 export default function CertificateGenerator({ isOpen, onClose, student, schoolName, schoolLogo }) {

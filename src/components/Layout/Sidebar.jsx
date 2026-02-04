@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
 import {
-    School, Users, BookOpen, Settings, UserPlus, Trash2, Edit3,
-    Save, User, ArrowUpCircle, ArrowDownCircle, FileText,
-    Palette, Share2, ChevronLeft, ChevronRight, Plus, X, Check,
-    Upload, Image, Phone, Mail, FileUp, FileDown, FolderUp, FolderDown,
-    LogOut, Crown, Shield, Sparkles, UploadCloud, DownloadCloud,
-    Award, BarChart2, Sun, Moon, Rainbow, QrCode, Wand2
-} from 'lucide-react';
+    SchoolIcon, UsersIcon, BookOpenIcon, SettingsIcon, UserAddIcon, TrashIcon, EditIcon,
+    SaveIcon, StudentProfileIcon, ArrowUpCircleIcon, ArrowDownCircleIcon, FileTextIcon,
+    ShareIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, XIcon, CheckIcon,
+    UploadIcon, ImageIcon, PhoneIcon, MailIcon, ImportIcon, ExportIcon, CloudUploadIcon, CloudDownloadIcon,
+    LogoutIcon, CrownIcon, ShieldIcon, SparklesIcon,
+    AwardIcon, BarChartIcon, SunIcon, MoonIcon, RainbowIcon, QrCodeIcon, WandIcon
+} from '../Icons/CustomIcons';
 import './Sidebar.css';
 import LanguageSelector from '../Settings/LanguageSelector';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -52,7 +52,10 @@ export default function Sidebar({
     onOpenAdmin,
     onOpenUpgrade,
     onOpenCertificate,
-    onOpenAnalytics
+    onOpenAnalytics,
+    onOpenQRAttendance,
+    onOpenSmartSearch,
+    onOpenCloudBackup
 }) {
     const [newStandard, setNewStandard] = useState('');
     const [showAddStandard, setShowAddStandard] = useState(false);
@@ -100,7 +103,7 @@ export default function Sidebar({
                         {isOpen && <span className="logo-text display-font">EduNorm</span>}
                     </div>
                     <button className="toggle-btn btn-icon btn-ghost" onClick={onToggle}>
-                        {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+                        {isOpen ? <ChevronLeftIcon size={20} /> : <ChevronRightIcon size={20} />}
                     </button>
                 </div>
 
@@ -111,7 +114,7 @@ export default function Sidebar({
                             {user.photoURL ? (
                                 <img src={user.photoURL} alt="User" />
                             ) : (
-                                <User size={20} />
+                                <StudentProfileIcon size={20} />
                             )}
                         </div>
                         <div className="user-info">
@@ -119,12 +122,12 @@ export default function Sidebar({
                             <span className="user-email">{user.email || user.phoneNumber || ''}</span>
                         </div>
                         <span className={`tier-badge tier-${tier.toLowerCase()}`}>
-                            {tier === 'ADMIN' && <Shield size={12} />}
-                            {tier === 'PREMIUM' && <Crown size={12} />}
+                            {tier === 'ADMIN' && <ShieldIcon size={12} />}
+                            {tier === 'PREMIUM' && <CrownIcon size={12} />}
                             {tier}
                         </span>
                         <button className="btn-icon btn-ghost logout-btn" onClick={onLogout} title="Logout">
-                            <LogOut size={18} />
+                            <LogoutIcon size={18} />
                         </button>
                     </div>
                 )}
@@ -134,14 +137,14 @@ export default function Sidebar({
                     <div className="tier-actions">
                         {isAdmin && onOpenAdmin && (
                             <button className="tier-action-btn admin-btn" onClick={onOpenAdmin}>
-                                <Shield size={16} />
-                                Admin Panel
+                                <ShieldIcon size={16} />
+                                {t('sidebar.adminPanel', 'Admin Panel')}
                             </button>
                         )}
                         {isFree && onOpenUpgrade && (
                             <button className="tier-action-btn upgrade-btn" onClick={onOpenUpgrade}>
-                                <Sparkles size={16} />
-                                Upgrade to Premium
+                                <SparklesIcon size={16} />
+                                {t('sidebar.upgradeBtn', 'Upgrade to Premium')}
                             </button>
                         )}
                     </div>
@@ -152,8 +155,8 @@ export default function Sidebar({
                         {/* School Logo Upload */}
                         <div className="sidebar-section">
                             <label className="sidebar-label">
-                                <Image size={16} className="icon-primary" />
-                                School Logo
+                                <ImageIcon size={16} />
+                                {t('sidebar.schoolLogo', 'School Logo')}
                             </label>
                             <div className="logo-upload-area">
                                 {schoolLogo ? (
@@ -163,7 +166,7 @@ export default function Sidebar({
                                             className="remove-logo-btn"
                                             onClick={() => setSchoolLogo('')}
                                         >
-                                            <X size={14} />
+                                            <XIcon size={14} />
                                         </button>
                                     </div>
                                 ) : (
@@ -175,8 +178,8 @@ export default function Sidebar({
                                             onChange={handleLogoUpload}
                                             style={{ display: 'none' }}
                                         />
-                                        <Upload size={20} />
-                                        <span>Upload Logo</span>
+                                        <UploadIcon size={20} />
+                                        <span>{t('sidebar.uploadLogo', 'Upload Logo')}</span>
                                     </label>
                                 )}
                             </div>
@@ -185,8 +188,8 @@ export default function Sidebar({
                         {/* School Name */}
                         <div className="sidebar-section">
                             <label className="sidebar-label">
-                                <School size={16} className="icon-accent" />
-                                School Name
+                                <SchoolIcon size={16} />
+                                {t('sidebar.schoolName', 'School Name')}
                             </label>
                             <input
                                 type="text"
@@ -200,8 +203,8 @@ export default function Sidebar({
                         {/* School Contact */}
                         <div className="sidebar-section">
                             <label className="sidebar-label">
-                                <Phone size={16} className="icon-success" />
-                                School Contact
+                                <PhoneIcon size={16} />
+                                {t('sidebar.schoolContact', 'School Contact')}
                             </label>
                             <input
                                 type="tel"
@@ -215,8 +218,8 @@ export default function Sidebar({
                         {/* School Email */}
                         <div className="sidebar-section">
                             <label className="sidebar-label">
-                                <Mail size={16} className="icon-secondary" />
-                                School Email
+                                <MailIcon size={16} />
+                                {t('sidebar.schoolEmail', 'School Email')}
                             </label>
                             <input
                                 type="email"
@@ -230,8 +233,8 @@ export default function Sidebar({
                         {/* Teacher Name */}
                         <div className="sidebar-section">
                             <label className="sidebar-label">
-                                <Users size={16} className="icon-primary" />
-                                Teacher Name
+                                <UsersIcon size={16} />
+                                {t('sidebar.teacherName', 'Teacher Name')}
                             </label>
                             <input
                                 type="text"
@@ -245,8 +248,8 @@ export default function Sidebar({
                         {/* Standard Selection */}
                         <div className="sidebar-section">
                             <label className="sidebar-label">
-                                <BookOpen size={16} className="icon-warning" />
-                                Standard / Class
+                                <BookOpenIcon size={16} />
+                                {t('sidebar.standardClass', 'Standard / Class')}
                             </label>
                             <div className="flex gap-2">
                                 <select
@@ -263,7 +266,7 @@ export default function Sidebar({
                                     className="btn btn-accent btn-icon"
                                     onClick={() => setShowAddStandard(!showAddStandard)}
                                 >
-                                    <Plus size={18} />
+                                    <PlusIcon size={18} />
                                 </button>
                             </div>
 
@@ -277,7 +280,7 @@ export default function Sidebar({
                                         onChange={(e) => setNewStandard(e.target.value)}
                                     />
                                     <button className="btn btn-primary btn-sm" onClick={handleAddStandard}>
-                                        <Check size={16} />
+                                        <CheckIcon size={16} />
                                     </button>
                                 </div>
                             )}
@@ -288,8 +291,8 @@ export default function Sidebar({
                         {/* Data Box Management */}
                         <div className="sidebar-section">
                             <label className="sidebar-label">
-                                <Settings size={16} />
-                                Manage Data Fields
+                                <SettingsIcon size={16} />
+                                {t('sidebar.manageDataFields', 'Manage Data Fields')}
                             </label>
 
                             {/* Add New Field */}
@@ -297,8 +300,8 @@ export default function Sidebar({
                                 className="sidebar-action-btn"
                                 onClick={() => setShowAddField(!showAddField)}
                             >
-                                <UserPlus size={16} />
-                                Add New Data Box
+                                <UserAddIcon size={16} />
+                                {t('sidebar.addNewDataBox', 'Add New Data Box')}
                             </button>
 
                             {showAddField && (
@@ -311,7 +314,7 @@ export default function Sidebar({
                                         onChange={(e) => setNewFieldName(e.target.value)}
                                     />
                                     <button className="btn btn-primary btn-sm" onClick={handleAddField}>
-                                        <Check size={16} />
+                                        <CheckIcon size={16} />
                                     </button>
                                 </div>
                             )}
@@ -326,7 +329,7 @@ export default function Sidebar({
                                                 className="btn-icon-sm"
                                                 onClick={() => onRemoveDataBox(f.id)}
                                             >
-                                                <X size={12} />
+                                                <XIcon size={12} />
                                             </button>
                                         </div>
                                     ))}
@@ -340,7 +343,7 @@ export default function Sidebar({
                                     value={removeFieldId}
                                     onChange={(e) => setRemoveFieldId(e.target.value)}
                                 >
-                                    <option value="">Select to remove</option>
+                                    <option value="">{t('sidebar.selectToRemove', 'Select to remove')}</option>
                                     {allFields.map(f => (
                                         <option key={f.key || f.id} value={f.key || f.id}>{f.label || f.name}</option>
                                     ))}
@@ -355,7 +358,7 @@ export default function Sidebar({
                                     }}
                                     disabled={!removeFieldId}
                                 >
-                                    <X size={16} />
+                                    <XIcon size={16} />
                                 </button>
                             </div>
 
@@ -366,7 +369,7 @@ export default function Sidebar({
                                     value={renameFieldId}
                                     onChange={(e) => setRenameFieldId(e.target.value)}
                                 >
-                                    <option value="">Select to rename</option>
+                                    <option value="">{t('sidebar.selectToRename', 'Select to rename')}</option>
                                     {allFields.map(f => (
                                         <option key={f.key || f.id} value={f.key || f.id}>{f.label || f.name}</option>
                                     ))}
@@ -381,7 +384,7 @@ export default function Sidebar({
                                         }
                                     }}
                                 >
-                                    <Edit3 size={16} />
+                                    <EditIcon size={16} />
                                 </button>
                             </div>
                             {renameFieldId && (
@@ -399,26 +402,26 @@ export default function Sidebar({
 
                         {/* Quick Actions */}
                         <div className="sidebar-section">
-                            <label className="sidebar-label">Quick Actions</label>
+                            <label className="sidebar-label">{t('sidebar.quickActions', 'Quick Actions')}</label>
 
                             <button className="sidebar-action-btn primary" onClick={onSaveSettings}>
-                                <Save size={16} />
-                                Save Settings
+                                <SaveIcon size={16} />
+                                {t('sidebar.saveSettings', 'Save Settings')}
                             </button>
 
                             <button className="sidebar-action-btn" onClick={onOpenProfile}>
-                                <User size={16} />
-                                Student Profile
+                                <StudentProfileIcon size={16} />
+                                {t('sidebar.studentProfile', 'Student Profile')}
                             </button>
 
                             <button className="sidebar-action-btn" onClick={onGoToSheet}>
-                                <FileText size={16} />
-                                Go to Sheet
+                                <FileTextIcon size={16} />
+                                {t('sidebar.goToSheet', 'Go to Sheet')}
                             </button>
 
                             <button className="sidebar-action-btn accent" onClick={onImportExcel}>
-                                <FileUp size={16} />
-                                Import from Excel
+                                <ImportIcon size={16} />
+                                {t('sidebar.importExcel', 'Import from Excel')}
                             </button>
                         </div>
 
@@ -426,26 +429,26 @@ export default function Sidebar({
 
                         {/* Phase 10: Unique Features */}
                         <div className="sidebar-section">
-                            <label className="sidebar-label"><Sparkles size={14} className="icon-accent" /> Special Features</label>
+                            <label className="sidebar-label"><SparklesIcon size={14} /> {t('sidebar.specialFeatures', 'Special Features')}</label>
 
                             <button className="sidebar-action-btn gradient-btn" onClick={onOpenCertificate}>
-                                <Award size={16} className="icon-accent" />
-                                Certificate Generator
+                                <AwardIcon size={16} />
+                                {t('sidebar.certificateGenerator', 'Certificate Generator')}
                             </button>
 
                             <button className="sidebar-action-btn gradient-btn" onClick={onOpenAnalytics}>
-                                <BarChart2 size={16} className="icon-primary" />
-                                Analytics Dashboard
+                                <BarChartIcon size={16} />
+                                {t('sidebar.analyticsDashboard', 'Analytics Dashboard')}
                             </button>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={() => alert('QR Generator coming soon!')}>
-                                <QrCode size={16} className="icon-success" />
-                                QR Attendance
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenQRAttendance}>
+                                <QrCodeIcon size={16} />
+                                {t('sidebar.qrAttendance', 'QR Attendance')}
                             </button>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={() => alert('Smart Search coming soon!')}>
-                                <Wand2 size={16} className="icon-secondary" />
-                                Smart Search
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenSmartSearch}>
+                                <WandIcon size={16} />
+                                {t('sidebar.smartSearch', 'Smart Search')}
                             </button>
                         </div>
 
@@ -453,16 +456,16 @@ export default function Sidebar({
 
                         {/* Class Management */}
                         <div className="sidebar-section">
-                            <label className="sidebar-label">Class Management</label>
+                            <label className="sidebar-label">{t('sidebar.classManagement', 'Class Management')}</label>
 
                             <button className="sidebar-action-btn success" onClick={onUpgradeClass}>
-                                <ArrowUpCircle size={16} />
-                                Upgrade Class
+                                <ArrowUpCircleIcon size={16} />
+                                {t('sidebar.upgradeClass', 'Upgrade Class')}
                             </button>
 
                             <button className="sidebar-action-btn warning" onClick={onDowngradeClass}>
-                                <ArrowDownCircle size={16} />
-                                Downgrade Class
+                                <ArrowDownCircleIcon size={16} />
+                                {t('sidebar.downgradeClass', 'Downgrade Class')}
                             </button>
                         </div>
 
@@ -470,7 +473,7 @@ export default function Sidebar({
 
                         {/* Theme */}
                         <div className="sidebar-section">
-                            <label className="sidebar-label">Appearance</label>
+                            <label className="sidebar-label">{t('sidebar.appearance', 'Appearance')}</label>
 
                             <div className="theme-switcher">
                                 <button
@@ -478,21 +481,21 @@ export default function Sidebar({
                                     onClick={() => onChangeTheme('light')}
                                     title="Light"
                                 >
-                                    <Sun size={18} className="icon-accent" />
+                                    <SunIcon size={18} />
                                 </button>
                                 <button
                                     className={`theme-btn ${theme === 'dark' ? 'active' : ''}`}
                                     onClick={() => onChangeTheme('dark')}
                                     title="Dark"
                                 >
-                                    <Moon size={18} className="icon-primary" />
+                                    <MoonIcon size={18} />
                                 </button>
                                 <button
                                     className={`theme-btn ${theme === 'colorful' ? 'active' : ''}`}
                                     onClick={() => onChangeTheme('colorful')}
                                     title="Colorful"
                                 >
-                                    <Rainbow size={18} className="icon-secondary" />
+                                    <RainbowIcon size={18} />
                                 </button>
                             </div>
 
@@ -508,28 +511,23 @@ export default function Sidebar({
                             <label className="sidebar-label">{t('sidebar.dataManagement', 'Data Management')}</label>
 
                             <button className="sidebar-action-btn" onClick={() => onShare('export')}>
-                                <FileDown size={16} className="icon-primary" />
-                                Export Data
+                                <ExportIcon size={16} />
+                                {t('sidebar.exportData', 'Export Data')}
                             </button>
 
                             <button className="sidebar-action-btn" onClick={() => onShare('import')}>
-                                <FileUp size={16} className="icon-success" />
-                                Import Data
+                                <ImportIcon size={16} />
+                                {t('sidebar.importData', 'Import Data')}
                             </button>
 
                             <button className="sidebar-action-btn" onClick={() => onShare('share')}>
-                                <Share2 size={16} className="icon-secondary" />
-                                Share
+                                <ShareIcon size={16} />
+                                {t('sidebar.share', 'Share')}
                             </button>
 
-                            <button className="sidebar-action-btn success" onClick={() => onShare('backup')}>
-                                <UploadCloud size={16} className="icon-accent" />
-                                Backup to Drive
-                            </button>
-
-                            <button className="sidebar-action-btn accent" onClick={() => onShare('restore')}>
-                                <DownloadCloud size={16} className="icon-warning" />
-                                Restore from Drive
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenCloudBackup}>
+                                <CloudUploadIcon size={16} />
+                                {t('sidebar.cloudBackup', 'Cloud Backup')}
                             </button>
                         </div>
                     </div>
@@ -539,16 +537,16 @@ export default function Sidebar({
                 {!isOpen && (
                     <div className="sidebar-collapsed-icons">
                         <button className="collapsed-icon tooltip" data-tooltip="School" onClick={onToggle}>
-                            <School size={20} />
+                            <SchoolIcon size={20} />
                         </button>
                         <button className="collapsed-icon tooltip" data-tooltip="Student Profile" onClick={onOpenProfile}>
-                            <User size={20} />
+                            <StudentProfileIcon size={20} />
                         </button>
                         <button className="collapsed-icon tooltip" data-tooltip="Sheets" onClick={onGoToSheet}>
-                            <FileText size={20} />
+                            <FileTextIcon size={20} />
                         </button>
                         <button className="collapsed-icon tooltip" data-tooltip="Settings">
-                            <Settings size={20} />
+                            <SettingsIcon size={20} />
                         </button>
                     </div>
                 )}

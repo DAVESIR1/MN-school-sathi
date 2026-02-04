@@ -159,16 +159,57 @@
 
 /* Dark Mode */
 [data-theme="dark"] .language-trigger {
-    background: #2a2a3e;
-    border-color: #3a3a50;
+    background: rgba(60, 55, 80, 0.8);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #FAFAFF;
+}
+
+[data-theme="dark"] .language-trigger:hover {
+    background: rgba(70, 65, 90, 0.9);
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .current-lang {
+    color: #FAFAFF;
 }
 
 [data-theme="dark"] .language-dropdown {
-    background: #1e1e2e;
+    background: rgba(30, 30, 45, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .language-search {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .language-search input {
+    color: #FAFAFF;
+}
+
+[data-theme="dark"] .language-search input::placeholder {
+    color: #9595B8;
+}
+
+[data-theme="dark"] .category-label {
+    color: #9CA3AF;
 }
 
 [data-theme="dark"] .language-option:hover {
-    background: #2a2a3e;
+    background: rgba(100, 90, 130, 0.3);
+}
+
+[data-theme="dark"] .language-option.active {
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+[data-theme="dark"] .lang-name {
+    color: #EAEAF5;
+}
+
+[data-theme="dark"] .lang-native {
+    color: #B5B5D0;
 }
 
 /* RTL Support */

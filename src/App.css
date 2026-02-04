@@ -31,8 +31,9 @@
 .main-content {
     min-height: 100vh;
     padding: var(--space-6);
-    padding-bottom: 100px;
+    padding-bottom: 160px;
     transition: margin-left var(--transition-slow);
+    overflow-y: auto;
 }
 
 .main-content.sidebar-open {
@@ -265,6 +266,8 @@
     border-radius: var(--radius-lg);
     text-align: left;
     animation: slideUp var(--transition-slow) ease both;
+    color: #374151;
+    font-weight: 500;
 }
 
 .step-item:nth-child(1) {
@@ -349,6 +352,47 @@
     .edit-mode-bar .input-field {
         width: 100%;
     }
+}
+
+/* ===== DARK THEME ===== */
+[data-theme="dark"] .empty-state h2 {
+    color: #FAFAFF;
+}
+
+[data-theme="dark"] .empty-state p {
+    color: #B5B5D0;
+}
+
+[data-theme="dark"] .step-item {
+    background: linear-gradient(135deg, rgba(160, 136, 200, 0.25) 0%, rgba(200, 100, 150, 0.2) 100%);
+    color: #EAEAF5;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .step-num {
+    background: linear-gradient(135deg, #8B5CF6, #EC4899);
+}
+
+[data-theme="dark"] .fluffy-card {
+    background: rgba(40, 35, 55, 0.85);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .app-footer {
+    background: rgba(30, 30, 45, 0.98);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .footer-content {
+    color: #9CA3AF;
+}
+
+[data-theme="dark"] .footer-links a {
+    color: #B5B5D0;
+}
+
+[data-theme="dark"] .footer-links a:hover {
+    color: var(--primary);
 }
 
 /* ===== PRINT STYLES ===== */
