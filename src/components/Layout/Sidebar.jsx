@@ -4,7 +4,7 @@ import {
     Save, User, ArrowUpCircle, ArrowDownCircle, FileText,
     Palette, Share2, ChevronLeft, ChevronRight, Plus, X, Check,
     Upload, Image, Phone, Mail, FileUp, FileDown, FolderUp, FolderDown,
-    LogOut, Crown, Shield, Sparkles, CloudUpload, CloudDownload
+    LogOut, Crown, Shield, Sparkles, UploadCloud, DownloadCloud
 } from 'lucide-react';
 import './Sidebar.css';
 import LanguageSelector from '../Settings/LanguageSelector';
@@ -491,12 +491,12 @@ export default function Sidebar({
                             </button>
 
                             <button className="sidebar-action-btn success" onClick={() => onShare('backup')}>
-                                <CloudUpload size={16} />
+                                <UploadCloud size={16} />
                                 Backup to Drive
                             </button>
 
                             <button className="sidebar-action-btn accent" onClick={() => onShare('restore')}>
-                                <CloudDownload size={16} />
+                                <DownloadCloud size={16} />
                                 Restore from Drive
                             </button>
                         </div>
