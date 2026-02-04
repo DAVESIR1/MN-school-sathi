@@ -101,7 +101,7 @@ export default function GeneralRegister({
                 <div className="ledger-header">
                     <div className="ledger-title">
                         <FileSpreadsheet size={28} />
-                        <h2 className="display-font gradient-text">Universal Ledger</h2>
+                        <h2 className="display-font gradient-text">General Register</h2>
                         <span className="ledger-count badge badge-primary">{displayData.length} Students</span>
                     </div>
                     <div className="ledger-header-actions">

@@ -2,8 +2,9 @@ import React, { useState, useRef } from 'react';
 import {
     School, Users, BookOpen, Settings, UserPlus, Trash2, Edit3,
     Save, User, ArrowUpCircle, ArrowDownCircle, FileText,
-    Palette, Edit, Share2, ChevronLeft, ChevronRight, Plus, X, Check,
-    Upload, Image, Phone, Mail, FileUp, LogOut, Crown, Shield, Sparkles
+    Palette, Share2, ChevronLeft, ChevronRight, Plus, X, Check,
+    Upload, Image, Phone, Mail, FileUp, FileDown, FolderUp, FolderDown,
+    LogOut, Crown, Shield, Sparkles, CloudUpload, CloudDownload
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -434,9 +435,9 @@ export default function Sidebar({
 
                         <div className="sidebar-divider" />
 
-                        {/* Theme & Edit */}
+                        {/* Theme */}
                         <div className="sidebar-section">
-                            <label className="sidebar-label">Appearance & Edit</label>
+                            <label className="sidebar-label">Appearance</label>
 
                             <div className="theme-switcher">
                                 <button
@@ -461,18 +462,37 @@ export default function Sidebar({
                                     🌈
                                 </button>
                             </div>
+                        </div>
 
-                            <button
-                                className={`sidebar-action-btn ${editMode ? 'active' : ''}`}
-                                onClick={onEditMode}
-                            >
-                                <Edit size={16} />
-                                {editMode ? 'Exit Edit Mode' : 'Edit Mode'}
+                        <div className="sidebar-divider" />
+
+                        {/* Data Management - Separate buttons */}
+                        <div className="sidebar-section">
+                            <label className="sidebar-label">Data Management</label>
+
+                            <button className="sidebar-action-btn" onClick={() => onShare('export')}>
+                                <FileDown size={16} />
+                                Export Data
                             </button>
 
-                            <button className="sidebar-action-btn" onClick={onShare}>
+                            <button className="sidebar-action-btn" onClick={onImportExcel}>
+                                <FileUp size={16} />
+                                Import Data
+                            </button>
+
+                            <button className="sidebar-action-btn" onClick={() => onShare('share')}>
                                 <Share2 size={16} />
-                                Share / Export
+                                Share
+                            </button>
+
+                            <button className="sidebar-action-btn success" onClick={() => onShare('backup')}>
+                                <CloudUpload size={16} />
+                                Backup to Drive
+                            </button>
+
+                            <button className="sidebar-action-btn accent" onClick={() => onShare('restore')}>
+                                <CloudDownload size={16} />
+                                Restore from Drive
                             </button>
                         </div>
                     </div>

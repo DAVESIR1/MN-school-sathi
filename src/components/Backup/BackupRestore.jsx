@@ -261,7 +261,7 @@ Note: For full data, please use the JSON export feature and attach the file to y
                                 </button>
                                 <button className="backup-option" onClick={handleExportLedger}>
                                     <FileSpreadsheet size={32} />
-                                    <span>Ledger Export</span>
+                                    <span>Register Export</span>
                                     <small>General register format</small>
                                 </button>
                                 <button className="backup-option" onClick={handleDownloadTemplate}>

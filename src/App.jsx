@@ -315,7 +315,7 @@ function AppContent() {
                             onClick={() => setShowLedger(true)}
                         >
                             <FileSpreadsheet size={18} />
-                            View Ledger
+                            View Register
                         </button>
                         <button
                             className="btn btn-primary"
