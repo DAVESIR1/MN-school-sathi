@@ -1,4 +1,4 @@
-import { db } from '../config/firebase';
+import { db, isFirebaseConfigured } from '../config/firebase';
 import {
     doc,
     setDoc,
@@ -21,6 +21,11 @@ import * as localDb from './database';
 export async function backupToCloud(userId) {
     if (!userId) {
         throw new Error('User must be logged in to backup');
+    }
+
+    // Check if Firebase is configured
+    if (!isFirebaseConfigured || !db) {
+        throw new Error('Firebase is not configured. Please set up Firebase environment variables or use local backup.');
     }
 
     try {
@@ -80,6 +85,11 @@ export async function restoreFromCloud(userId) {
         throw new Error('User must be logged in to restore');
     }
 
+    // Check if Firebase is configured
+    if (!isFirebaseConfigured || !db) {
+        throw new Error('Firebase is not configured. Please set up Firebase environment variables.');
+    }
+
     try {
         // Get backup from Firestore
         const backupRef = doc(db, 'backups', userId);
@@ -135,6 +145,11 @@ export async function restoreFromCloud(userId) {
 // Check if backup exists
 export async function checkBackupExists(userId) {
     if (!userId) return { exists: false };
+
+    // Check if Firebase is configured
+    if (!isFirebaseConfigured || !db) {
+        return { exists: false, error: 'Firebase not configured' };
+    }
 
     try {
         const backupRef = doc(db, 'backups', userId);

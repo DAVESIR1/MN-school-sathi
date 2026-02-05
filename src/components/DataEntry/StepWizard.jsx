@@ -106,6 +106,11 @@ export default function StepWizard({
     const [saving, setSaving] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
+    // Update form data when initialData changes (e.g. selecting different student)
+    React.useEffect(() => {
+        setFormData(initialData);
+    }, [initialData]);
+
     const totalSteps = DATA_FIELDS.length + (customFields.length > 0 ? 1 : 0);
     const currentStepData = DATA_FIELDS.find(s => s.step === currentStep);
 

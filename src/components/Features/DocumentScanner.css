@@ -1,0 +1,373 @@
+.doc-scanner-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.doc-scanner-modal {
+    background: var(--bg-card);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+}
+
+.doc-scanner-header {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.doc-scanner-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.scanner-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.doc-scanner-header .close-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    transition: all 0.2s;
+}
+
+.doc-scanner-header .close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.doc-scanner-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+.scanner-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.option-card {
+    background: var(--bg-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.option-card:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    transform: translateY(-4px);
+}
+
+.option-card svg {
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+.option-card h3 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.option-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.camera-view {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+}
+
+.camera-view video {
+    width: 100%;
+    display: block;
+}
+
+.camera-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.scan-frame {
+    width: 85%;
+    height: 60%;
+    border: 3px solid rgba(99, 102, 241, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+.camera-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+}
+
+.capture-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s;
+}
+
+.capture-btn:hover {
+    transform: scale(1.05);
+}
+
+.cancel-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+}
+
+.preview-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.image-preview {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+}
+
+.image-preview img {
+    width: 100%;
+    display: block;
+}
+
+.scanning-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.scanning-overlay .spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.scanning-overlay p {
+    margin: 16px 0 8px;
+    font-size: 1.1rem;
+}
+
+.progress-bar {
+    width: 200px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    transition: width 0.3s;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.scan-btn,
+.retake-btn,
+.apply-btn,
+.rescan-btn {
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    transition: all 0.2s;
+}
+
+.scan-btn {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+}
+
+.retake-btn,
+.rescan-btn {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.apply-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.apply-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.results-section h3 {
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #10b981;
+}
+
+.extracted-fields {
+    display: grid;
+    gap: 12px;
+}
+
+.field-row {
+    display: flex;
+    align-items: center;
+    background: var(--bg-secondary);
+    padding: 12px 16px;
+    border-radius: 10px;
+}
+
+.field-row.full-width {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.field-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    min-width: 120px;
+}
+
+.field-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.no-data {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+}
+
+.no-data svg {
+    color: #f59e0b;
+    margin-bottom: 12px;
+}
+
+.result-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    color: #ef4444;
+    margin-top: 16px;
+}
+
+.doc-scanner-footer {
+    padding: 16px 24px;
+    background: var(--bg-secondary);
+    text-align: center;
+}
+
+.doc-scanner-footer p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 600px) {
+    .scanner-options {
+        grid-template-columns: 1fr;
+    }
+
+    .option-card {
+        padding: 30px 20px;
+    }
+}

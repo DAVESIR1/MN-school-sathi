@@ -630,7 +630,8 @@ select.input-field {
 }
 
 .animate-bounce {
-  animation: bounce 2s infinite;
+  /* Animation disabled */
+  animation: none;
 }
 
 .animate-pulse {
@@ -638,7 +639,8 @@ select.input-field {
 }
 
 .animate-float {
-  animation: float 3s ease-in-out infinite;
+  /* Animation disabled */
+  animation: none;
 }
 
 /* ===== UTILITY CLASSES ===== */
@@ -855,7 +857,7 @@ select.input-field {
   background: var(--pastel-lavender);
   top: -100px;
   left: -100px;
-  animation: float 8s ease-in-out infinite;
+  /* Animation removed for performance */
 }
 
 .blob-2 {
@@ -864,7 +866,7 @@ select.input-field {
   background: var(--pastel-pink);
   bottom: -80px;
   right: -80px;
-  animation: float 10s ease-in-out infinite reverse;
+  /* Animation removed for performance */
 }
 
 .blob-3 {
@@ -873,7 +875,7 @@ select.input-field {
   background: var(--pastel-mint);
   top: 50%;
   right: 10%;
-  animation: float 7s ease-in-out infinite;
+  /* Animation removed for performance */
 }
 
 /* ===== PROGRESS BAR ===== */

@@ -16,7 +16,7 @@ const TEMPLATES = [
 
 export default function TemplateSelector({ selected, onSelect }) {
     return (
-        <div className="template-selector">
+        <div className="template-selector no-print">
             <span className="selector-label">Template:</span>
             <div className="template-list">
                 {TEMPLATES.map(template => (

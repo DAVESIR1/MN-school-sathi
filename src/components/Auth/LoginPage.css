@@ -30,7 +30,7 @@
     background: var(--pastel-lavender);
     top: -200px;
     left: -150px;
-    animation: float 10s ease-in-out infinite;
+    /* Animation removed */
 }
 
 .login-bg .blob-2 {
@@ -39,7 +39,7 @@
     background: var(--pastel-pink);
     bottom: -150px;
     right: -100px;
-    animation: float 12s ease-in-out infinite reverse;
+    /* Animation removed */
 }
 
 .login-bg .blob-3 {
@@ -48,7 +48,7 @@
     background: var(--pastel-mint);
     top: 50%;
     right: 20%;
-    animation: float 8s ease-in-out infinite;
+    /* Animation removed */
 }
 
 @keyframes float {
@@ -87,7 +87,7 @@
     font-size: 4rem;
     margin-bottom: var(--space-3);
     display: inline-block;
-    animation: bounce 2s infinite;
+    /* Animation removed */
 }
 
 @keyframes bounce {

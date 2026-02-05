@@ -11,6 +11,12 @@ import CertificateGenerator from './components/Features/CertificateGenerator';
 import AnalyticsDashboard from './components/Features/AnalyticsDashboard';
 import QRAttendance from './components/Features/QRAttendance';
 import SmartSearch from './components/Features/SmartSearch';
+import DocumentScanner from './components/Features/DocumentScanner';
+import VoiceInput from './components/Features/VoiceInput';
+import FamilyTree from './components/Features/FamilyTree';
+import ProgressTimeline from './components/Features/ProgressTimeline';
+import WhatsAppMessenger from './components/Features/WhatsAppMessenger';
+import PhotoEnhancement from './components/Features/PhotoEnhancement';
 import { AdPlacement } from './components/Ads/AdBanner';
 import UpgradeModal from './components/Premium/UpgradeModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -51,6 +57,12 @@ function AppContent() {
     const [showQRAttendance, setShowQRAttendance] = useState(false);
     const [showSmartSearch, setShowSmartSearch] = useState(false);
     const [showCloudBackup, setShowCloudBackup] = useState(false);
+    const [showDocScanner, setShowDocScanner] = useState(false);
+    const [showVoiceInput, setShowVoiceInput] = useState(false);
+    const [showFamilyTree, setShowFamilyTree] = useState(false);
+    const [showTimeline, setShowTimeline] = useState(false);
+    const [showWhatsApp, setShowWhatsApp] = useState(false);
+    const [showPhotoEnhance, setShowPhotoEnhance] = useState(false);
     const [backupAction, setBackupAction] = useState('export');
 
     // Hooks
@@ -362,6 +374,12 @@ function AppContent() {
                 onOpenQRAttendance={() => setShowQRAttendance(true)}
                 onOpenSmartSearch={() => setShowSmartSearch(true)}
                 onOpenCloudBackup={() => setShowCloudBackup(true)}
+                onOpenDocScanner={() => setShowDocScanner(true)}
+                onOpenVoiceInput={() => setShowVoiceInput(true)}
+                onOpenFamilyTree={() => setShowFamilyTree(true)}
+                onOpenTimeline={() => setShowTimeline(true)}
+                onOpenWhatsApp={() => setShowWhatsApp(true)}
+                onOpenPhotoEnhance={() => setShowPhotoEnhance(true)}
             />
 
             {/* Main Content */}
@@ -459,7 +477,7 @@ function AppContent() {
                     ) : (
                         <div className="no-standard-selected fluffy-card">
                             <div className="empty-state">
-                                <span className="empty-icon animate-float">🏫</span>
+                                <img src="/edunorm-logo.png" alt="EduNorm" className="welcome-logo" />
                                 <h2 className="display-font">Welcome to EduNorm!</h2>
                                 <p>Please select or create a Standard/Class from the sidebar to start entering student data.</p>
                                 <div className="empty-steps">
@@ -582,6 +600,56 @@ function AppContent() {
                 onClose={() => setShowCloudBackup(false)}
                 onRestoreComplete={() => {
                     window.location.reload();
+                }}
+            />
+
+            {/* Document Scanner */}
+            <DocumentScanner
+                isOpen={showDocScanner}
+                onClose={() => setShowDocScanner(false)}
+                onDataExtracted={(data) => {
+                    console.log('Extracted data:', data);
+                    // Can be used to prefill form data
+                }}
+            />
+
+            {/* Voice Input */}
+            <VoiceInput
+                isOpen={showVoiceInput}
+                onClose={() => setShowVoiceInput(false)}
+                onVoiceData={(data) => {
+                    console.log('Voice data:', data);
+                }}
+            />
+
+            {/* Family Tree */}
+            <FamilyTree
+                isOpen={showFamilyTree}
+                onClose={() => setShowFamilyTree(false)}
+                student={editingStudent || (students.length > 0 ? students[0] : null)}
+            />
+
+            {/* Progress Timeline */}
+            <ProgressTimeline
+                isOpen={showTimeline}
+                onClose={() => setShowTimeline(false)}
+                student={editingStudent || (students.length > 0 ? students[0] : null)}
+            />
+
+            {/* WhatsApp Messenger */}
+            <WhatsAppMessenger
+                isOpen={showWhatsApp}
+                onClose={() => setShowWhatsApp(false)}
+                students={students}
+                schoolName={schoolName}
+            />
+
+            {/* Photo Enhancement */}
+            <PhotoEnhancement
+                isOpen={showPhotoEnhance}
+                onClose={() => setShowPhotoEnhance(false)}
+                onPhotoEnhanced={(photo) => {
+                    console.log('Enhanced photo:', photo);
                 }}
             />
 

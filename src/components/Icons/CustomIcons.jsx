@@ -404,6 +404,47 @@ export const BookOpenIcon = ({ size = 24, className = '' }) => (
     </svg>
 );
 
+export const CameraIcon = ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+        <rect x="4" y="14" width="40" height="28" rx="4" stroke="#6366F1" strokeWidth="2.5" />
+        <circle cx="24" cy="28" r="8" stroke="#6366F1" strokeWidth="2.5" />
+        <path d="M16 14L18 8H30L32 14" stroke="#6366F1" strokeWidth="2.5" strokeLinejoin="round" />
+        <circle cx="36" cy="20" r="2" fill="#6366F1" />
+    </svg>
+);
+
+export const MicIcon = ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+        <rect x="16" y="4" width="16" height="24" rx="8" stroke="#10B981" strokeWidth="2.5" />
+        <path d="M8 24C8 32.8 15.2 40 24 40C32.8 40 40 32.8 40 24" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M24 40V46" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M16 46H32" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+);
+
+export const GitBranchIcon = ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+        <circle cx="12" cy="12" r="4" stroke="#F59E0B" strokeWidth="2.5" />
+        <circle cx="12" cy="36" r="4" stroke="#F59E0B" strokeWidth="2.5" />
+        <circle cx="36" cy="20" r="4" stroke="#F59E0B" strokeWidth="2.5" />
+        <path d="M12 16V32" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M12 20C12 20 12 20 20 20C28 20 32 20 32 20" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+);
+
+export const ClockIcon = ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+        <circle cx="24" cy="24" r="18" stroke="#8B5CF6" strokeWidth="2.5" />
+        <path d="M24 12V24L32 30" stroke="#8B5CF6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const MessageCircleIcon = ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+        <path d="M44 22C44 30.8 35 38 24 38C21.3 38 18.7 37.5 16.4 36.6L6 42L9.4 33.2C6.4 30 4 26.2 4 22C4 13.2 13 6 24 6C35 6 44 13.2 44 22Z" stroke="#25D366" strokeWidth="2.5" strokeLinejoin="round" />
+    </svg>
+);
+
 // Export all icons as a map for easy lookup
 export const IconMap = {
     studentProfile: StudentProfileIcon,
@@ -455,6 +496,11 @@ export const IconMap = {
     arrowUpCircle: ArrowUpCircleIcon,
     arrowDownCircle: ArrowDownCircleIcon,
     bookOpen: BookOpenIcon,
+    camera: CameraIcon,
+    mic: MicIcon,
+    gitBranch: GitBranchIcon,
+    clock: ClockIcon,
+    messageCircle: MessageCircleIcon,
 };
 
 export default IconMap;

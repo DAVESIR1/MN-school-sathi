@@ -35,7 +35,8 @@
     -webkit-backdrop-filter: blur(20px);
     border-radius: 20px;
     width: 90%;
-    max-width: 440px;
+    max-width: 480px;
+    min-width: 320px;
     overflow: hidden;
     box-shadow:
         0 25px 50px -12px rgba(0, 0, 0, 0.25),
@@ -317,14 +318,16 @@
     font-weight: 700;
     letter-spacing: -0.01em;
     line-height: 1.3;
-    white-space: nowrap;
+    white-space: normal;
+    word-wrap: break-word;
 }
 
 .btn-desc {
     font-size: 0.7rem;
     opacity: 0.85;
     line-height: 1.3;
-    white-space: nowrap;
+    white-space: normal;
+    word-wrap: break-word;
 }
 
 /* Cloud Note */
@@ -392,12 +395,17 @@
 }
 
 /* Responsive */
-@media (max-width: 400px) {
-    .action-buttons {
-        grid-template-columns: 1fr;
+@media (max-width: 480px) {
+    .cloud-backup-content .action-buttons {
+        flex-direction: column;
+    }
+
+    .cloud-backup-content .action-btn {
+        padding: 14px 16px;
     }
 
     .cloud-backup-modal {
         width: 95%;
+        max-width: none;
     }
 }

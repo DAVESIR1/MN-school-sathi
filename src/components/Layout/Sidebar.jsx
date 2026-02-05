@@ -5,7 +5,8 @@ import {
     ShareIcon, ChevronLeftIcon, ChevronRightIcon, PlusIcon, XIcon, CheckIcon,
     UploadIcon, ImageIcon, PhoneIcon, MailIcon, ImportIcon, ExportIcon, CloudUploadIcon, CloudDownloadIcon,
     LogoutIcon, CrownIcon, ShieldIcon, SparklesIcon,
-    AwardIcon, BarChartIcon, SunIcon, MoonIcon, RainbowIcon, QrCodeIcon, WandIcon
+    AwardIcon, BarChartIcon, SunIcon, MoonIcon, RainbowIcon, QrCodeIcon, WandIcon,
+    CameraIcon, MicIcon, GitBranchIcon, ClockIcon, MessageCircleIcon, ImageIcon as PhotoIcon
 } from '../Icons/CustomIcons';
 import './Sidebar.css';
 import LanguageSelector from '../Settings/LanguageSelector';
@@ -55,7 +56,13 @@ export default function Sidebar({
     onOpenAnalytics,
     onOpenQRAttendance,
     onOpenSmartSearch,
-    onOpenCloudBackup
+    onOpenCloudBackup,
+    onOpenDocScanner,
+    onOpenVoiceInput,
+    onOpenFamilyTree,
+    onOpenTimeline,
+    onOpenWhatsApp,
+    onOpenPhotoEnhance
 }) {
     const [newStandard, setNewStandard] = useState('');
     const [showAddStandard, setShowAddStandard] = useState(false);
@@ -98,8 +105,8 @@ export default function Sidebar({
         <>
             <aside className={`sidebar ${isOpen ? 'open' : 'collapsed'}`}>
                 <div className="sidebar-header">
-                    <div className="sidebar-logo animate-float">
-                        <span className="logo-icon">📚</span>
+                    <div className="sidebar-logo">
+                        <img src="/edunorm-logo.png" alt="EduNorm" className="logo-image" />
                         {isOpen && <span className="logo-text display-font">EduNorm</span>}
                     </div>
                     <button className="toggle-btn btn-icon btn-ghost" onClick={onToggle}>
@@ -449,6 +456,36 @@ export default function Sidebar({
                             <button className="sidebar-action-btn gradient-btn" onClick={onOpenSmartSearch}>
                                 <WandIcon size={16} />
                                 {t('sidebar.smartSearch', 'Smart Search')}
+                            </button>
+
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenDocScanner}>
+                                <CameraIcon size={16} />
+                                {t('sidebar.docScanner', 'Document Scanner')}
+                            </button>
+
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenVoiceInput}>
+                                <MicIcon size={16} />
+                                {t('sidebar.voiceInput', 'Voice Input')}
+                            </button>
+
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenFamilyTree}>
+                                <GitBranchIcon size={16} />
+                                {t('sidebar.familyTree', 'Family Tree')}
+                            </button>
+
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenTimeline}>
+                                <ClockIcon size={16} />
+                                {t('sidebar.progressTimeline', 'Progress Timeline')}
+                            </button>
+
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenWhatsApp}>
+                                <MessageCircleIcon size={16} />
+                                {t('sidebar.whatsappMessenger', 'WhatsApp Messenger')}
+                            </button>
+
+                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenPhotoEnhance}>
+                                <PhotoIcon size={16} />
+                                {t('sidebar.photoEnhance', 'Photo Enhancement')}
                             </button>
                         </div>
 

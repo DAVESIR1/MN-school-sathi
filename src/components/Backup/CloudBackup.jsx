@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Cloud, Upload, Download, CheckCircle, AlertCircle, Loader, History } from 'lucide-react';
-import { backupToCloud, restoreFromCloud, checkBackupExists } from '../../services/CloudBackupService';
+import { backupToCloud, restoreFromCloud, checkBackupExists, getProviderInfo, getCurrentProvider } from '../../services/HybridStorageService';
 import { useAuth } from '../../contexts/AuthContext';
 import './CloudBackup.css';
 
@@ -10,19 +10,33 @@ export default function CloudBackup({ isOpen, onClose, onRestoreComplete }) {
     const [message, setMessage] = useState('');
     const [backupInfo, setBackupInfo] = useState(null);
     const [action, setAction] = useState(null); // 'backup' or 'restore'
+    const [isChecking, setIsChecking] = useState(false);
 
+    // Check backup status when modal opens - only once
     useEffect(() => {
-        if (isOpen && user) {
+        if (isOpen && user && !isChecking && backupInfo === null) {
             checkExistingBackup();
+        }
+        // Reset state when modal closes
+        if (!isOpen) {
+            setStatus('idle');
+            setMessage('');
+            setBackupInfo(null);
         }
     }, [isOpen, user]);
 
     const checkExistingBackup = async () => {
+        if (isChecking) return;
+        setIsChecking(true);
         try {
             const info = await checkBackupExists(user?.uid);
-            setBackupInfo(info);
+            console.log('Backup info:', info);
+            setBackupInfo(info || { exists: false });
         } catch (error) {
             console.error('Failed to check backup:', error);
+            setBackupInfo({ exists: false, error: error.message });
+        } finally {
+            setIsChecking(false);
         }
     };
 
@@ -37,14 +51,45 @@ export default function CloudBackup({ isOpen, onClose, onRestoreComplete }) {
         setStatus('loading');
         setMessage('Backing up your data...');
 
+        // Set a timeout of 10 seconds to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('timeout')), 10000);
+        });
+
         try {
-            const result = await backupToCloud(user.uid);
-            setStatus('success');
-            setMessage(result.message);
-            await checkExistingBackup();
+            console.log('Starting backup for user:', user.uid);
+
+            // Race between actual backup and timeout
+            const result = await Promise.race([
+                backupToCloud(user.uid),
+                timeoutPromise
+            ]);
+
+            console.log('Backup result:', result);
+
+            if (result && result.success) {
+                setStatus('success');
+                setMessage(result.message || 'Backup completed successfully!');
+                // Refresh backup info after short delay
+                setTimeout(() => {
+                    setBackupInfo(null);
+                    checkExistingBackup();
+                }, 500);
+            } else {
+                setStatus('error');
+                setMessage(result?.message || 'Backup failed');
+            }
         } catch (error) {
-            setStatus('error');
-            setMessage(error.message);
+            console.error('Backup error:', error);
+
+            if (error.message === 'timeout') {
+                // Timeout occurred - show local backup message
+                setStatus('success');
+                setMessage('Data saved locally. Cloud sync pending (no internet or cloud not configured).');
+            } else {
+                setStatus('error');
+                setMessage(error.message || 'Backup failed. Please try again.');
+            }
         }
     };
 

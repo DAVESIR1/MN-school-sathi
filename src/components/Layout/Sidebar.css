@@ -46,8 +46,10 @@
 }
 
 .user-avatar {
-    width: 36px;
-    height: 36px;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px;
+    max-width: 24px;
     border-radius: 50%;
     background: linear-gradient(135deg, #7c3aed, #db2777);
     display: flex;
@@ -162,7 +164,7 @@
 .tier-action-btn.upgrade-btn {
     background: linear-gradient(135deg, #f59e0b, #ef4444);
     color: white;
-    animation: pulse-glow 2s ease-in-out infinite;
+    /* Animation removed for performance */
 }
 
 .tier-action-btn.upgrade-btn:hover {
@@ -188,6 +190,14 @@
     gap: var(--space-3);
     flex: 1;
     min-width: 0;
+}
+
+.logo-image {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .logo-icon {
@@ -660,11 +670,37 @@
 /* ================== COLORFUL THEME SIDEBAR ================== */
 [data-theme="colorful"] .sidebar-action-btn {
     background: rgba(255, 255, 255, 0.9);
+    color: #1f2937 !important;
+    border-color: rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="colorful"] .sidebar-action-btn:hover {
     background: rgba(255, 255, 255, 1);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #111827 !important;
+}
+
+[data-theme="colorful"] .sidebar-action-btn span,
+[data-theme="colorful"] .sidebar-action-btn svg {
+    color: #374151 !important;
+}
+
+[data-theme="colorful"] .sidebar-label {
+    color: #4b5563 !important;
+}
+
+[data-theme="colorful"] .sidebar-divider {
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="colorful"] .input-field {
+    background: rgba(255, 255, 255, 0.9);
+    color: #1f2937;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="colorful"] .input-field::placeholder {
+    color: #6b7280;
 }
 
 /* Responsive */

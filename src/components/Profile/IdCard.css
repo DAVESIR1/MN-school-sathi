@@ -1,15 +1,24 @@
 /* ===== ID CARD BASE STYLES ===== */
+/* Standard ID Card Size: 85.6mm × 54mm (3.375" × 2.125") - Credit Card Size */
 .id-card {
-    width: 400px;
-    height: 250px;
-    border-radius: 18px;
+    width: 85.6mm;
+    height: 54mm;
+    border-radius: 3mm;
     overflow: hidden;
     position: relative;
     font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
     box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.25),
-        0 8px 20px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 2px 4px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+/* Screen preview scaling (for better visibility in modal) */
+.id-card-preview {
+    transform: scale(1.3);
+    transform-origin: top left;
+    margin-bottom: 20mm;
+    margin-right: 30mm;
 }
 
 /* Background Layer */
@@ -41,7 +50,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 6px;
+    height: 2mm;
 }
 
 /* Content Layer */
@@ -51,40 +60,40 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 16px 20px 12px;
+    padding: 3mm 4mm 2mm;
 }
 
-/* Header */
+/* Header - Compact */
 .id-header {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 12px;
+    gap: 2.5mm;
+    margin-bottom: 2mm;
 }
 
 .id-logo-wrap {
-    width: 48px;
-    height: 48px;
+    width: 10mm;
+    height: 10mm;
     flex-shrink: 0;
-    border-radius: 12px;
+    border-radius: 2mm;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .id-logo-img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 4px;
+    padding: 1mm;
 }
 
 .id-logo-default {
-    font-size: 1.8rem;
+    font-size: 5mm;
 }
 
 .id-school-text {
@@ -93,7 +102,7 @@
 }
 
 .id-school-name {
-    font-size: 15px;
+    font-size: 3mm;
     font-weight: 700;
     margin: 0;
     line-height: 1.2;
@@ -104,18 +113,18 @@
 }
 
 .id-card-type {
-    font-size: 8px;
+    font-size: 1.8mm;
     font-weight: 600;
-    letter-spacing: 2px;
+    letter-spacing: 0.5mm;
     opacity: 0.8;
-    margin-top: 3px;
+    margin-top: 0.5mm;
     text-transform: uppercase;
 }
 
 /* Main Section */
 .id-main {
     display: flex;
-    gap: 16px;
+    gap: 3mm;
     flex: 1;
 }
 
@@ -124,13 +133,13 @@
 }
 
 .id-photo-container {
-    width: 80px;
-    height: 100px;
-    border-radius: 12px;
+    width: 16mm;
+    height: 20mm;
+    border-radius: 2mm;
     overflow: hidden;
     background: rgba(255, 255, 255, 0.2);
-    border: 3px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border: 0.5mm solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 1mm 3mm rgba(0, 0, 0, 0.15);
 }
 
 .id-photo-img {
@@ -149,7 +158,7 @@
 }
 
 .photo-icon {
-    font-size: 2.5rem;
+    font-size: 6mm;
     opacity: 0.6;
 }
 
@@ -162,60 +171,60 @@
 }
 
 .id-student-name {
-    font-size: 16px;
+    font-size: 3.5mm;
     font-weight: 700;
     line-height: 1.2;
-    margin-bottom: 8px;
+    margin-bottom: 1.5mm;
     letter-spacing: -0.01em;
 }
 
 .id-fields {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-bottom: 8px;
+    gap: 1.5mm;
+    margin-bottom: 1.5mm;
 }
 
 .id-field {
     background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(4px);
-    padding: 6px 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(2px);
+    padding: 1mm 1.5mm;
+    border-radius: 1.5mm;
+    border: 0.3mm solid rgba(255, 255, 255, 0.3);
 }
 
 .field-label {
     display: block;
-    font-size: 7px;
+    font-size: 1.5mm;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.2mm;
     opacity: 0.7;
-    margin-bottom: 2px;
+    margin-bottom: 0.3mm;
 }
 
 .field-value {
     display: block;
-    font-size: 12px;
+    font-size: 2.5mm;
     font-weight: 700;
 }
 
 .id-contact-info {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 1.5mm;
     margin-top: auto;
 }
 
 .contact-row {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 10px;
+    gap: 1mm;
+    font-size: 2mm;
 }
 
 .contact-icon {
-    font-size: 11px;
+    font-size: 2.2mm;
 }
 
 .contact-text {
@@ -227,21 +236,21 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 1.5mm;
+    padding-top: 1.5mm;
+    border-top: 0.2mm solid rgba(255, 255, 255, 0.2);
 }
 
 .id-validity {
-    font-size: 9px;
+    font-size: 1.8mm;
     background: rgba(255, 255, 255, 0.15);
-    padding: 3px 10px;
-    border-radius: 6px;
+    padding: 0.8mm 2mm;
+    border-radius: 1mm;
 }
 
 .validity-label {
     opacity: 0.7;
-    margin-right: 4px;
+    margin-right: 1mm;
 }
 
 .validity-year {
@@ -253,17 +262,17 @@
 }
 
 .auth-line {
-    width: 70px;
-    height: 1px;
+    width: 15mm;
+    height: 0.2mm;
     background: currentColor;
     opacity: 0.4;
-    margin-bottom: 3px;
+    margin-bottom: 0.5mm;
 }
 
 .auth-text {
-    font-size: 7px;
+    font-size: 1.5mm;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.2mm;
     opacity: 0.6;
 }
 
@@ -364,7 +373,7 @@
     background: rgba(255, 255, 255, 0.3);
     top: 20px;
     right: 40px;
-    animation: bounce 3s ease-in-out infinite;
+    /* Animation removed */
 }
 
 .template-colorful-fun .shape-2 {
@@ -373,7 +382,7 @@
     background: rgba(255, 255, 255, 0.25);
     bottom: 40px;
     left: 100px;
-    animation: bounce 4s ease-in-out infinite 1s;
+    /* Animation removed */
 }
 
 .template-colorful-fun .shape-3 {
@@ -382,7 +391,7 @@
     background: rgba(255, 255, 255, 0.2);
     top: 60px;
     left: 180px;
-    animation: bounce 3.5s ease-in-out infinite 0.5s;
+    /* Animation removed */
 }
 
 @keyframes bounce {
@@ -968,11 +977,20 @@
 }
 
 /* ===== PRINT STYLES ===== */
+/* ===== PRINT STYLES ===== */
 @media print {
     .id-card {
-        box-shadow: none;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        box-shadow: none !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .id-card-preview {
+        transform: none !important;
+        margin: 0 !important;
     }
 
     .shape-1,
@@ -982,12 +1000,89 @@
     }
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 440px) {
+/* ===== BATCH PRINT CONTAINER ===== */
+.id-card-batch-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5mm;
+    padding: 10mm;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Batch print sheet - for print layout */
+.id-card-print-sheet {
+    width: 100%;
+    display: grid;
+    gap: 5mm;
+    padding: 10mm;
+    box-sizing: border-box;
+}
+
+/* A4 Paper: 210mm × 297mm - 2 columns × 5 rows = 10 cards */
+.id-card-print-sheet.paper-a4 {
+    grid-template-columns: repeat(2, 85.6mm);
+    grid-template-rows: repeat(5, 54mm);
+    width: 210mm;
+    min-height: 297mm;
+    justify-content: center;
+}
+
+/* Letter Paper: 216mm × 279mm - 2 columns × 5 rows = 10 cards */
+.id-card-print-sheet.paper-letter {
+    grid-template-columns: repeat(2, 85.6mm);
+    grid-template-rows: repeat(5, 54mm);
+    width: 216mm;
+    min-height: 279mm;
+    justify-content: center;
+}
+
+/* Legal Paper: 216mm × 356mm - 2 columns × 6 rows = 12 cards */
+.id-card-print-sheet.paper-legal {
+    grid-template-columns: repeat(2, 85.6mm);
+    grid-template-rows: repeat(6, 54mm);
+    width: 216mm;
+    min-height: 356mm;
+    justify-content: center;
+}
+
+/* A5 Paper: 148mm × 210mm - 1 column × 3 rows = 3 cards */
+.id-card-print-sheet.paper-a5 {
+    grid-template-columns: 85.6mm;
+    grid-template-rows: repeat(3, 54mm);
+    width: 148mm;
+    min-height: 210mm;
+    justify-content: center;
+}
+
+/* Print page setup */
+@page {
+    margin: 10mm;
+}
+
+@media print {
+    .id-card-print-sheet {
+        padding: 0 !important;
+        gap: 3mm !important;
+    }
+
+    .id-card-batch-container {
+        padding: 0 !important;
+    }
+}
+
+/* ===== RESPONSIVE FOR SCREEN ===== */
+@media screen and (max-width: 440px) {
     .id-card {
         width: 100%;
-        max-width: 400px;
+        max-width: 85.6mm;
         height: auto;
-        min-height: 250px;
+        min-height: 54mm;
+        aspect-ratio: 85.6 / 54;
+    }
+
+    .id-card-batch-container {
+        padding: 4mm;
+        gap: 4mm;
     }
 }

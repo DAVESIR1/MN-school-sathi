@@ -65,30 +65,71 @@ export async function backupToCloud(userId) {
     const allData = await database.exportAllData();
     LocalBackupService.createLocalBackup(allData);
 
-    switch (currentProvider) {
-        case PROVIDERS.FIREBASE:
-            return await CloudBackupService.backupToCloud(userId);
-
-        case PROVIDERS.CLOUDFLARE_R2:
-            if (!R2StorageService.isR2Configured()) {
-                console.warn('R2 not configured, falling back to Firebase');
+    try {
+        switch (currentProvider) {
+            case PROVIDERS.FIREBASE:
                 return await CloudBackupService.backupToCloud(userId);
-            }
-            return await R2StorageService.uploadBackup(userId, allData);
 
-        case PROVIDERS.SUPABASE:
-            console.warn('Supabase not yet implemented, falling back to Firebase');
-            return await CloudBackupService.backupToCloud(userId);
+            case PROVIDERS.CLOUDFLARE_R2:
+                if (!R2StorageService.isR2Configured()) {
+                    console.warn('R2 not configured, falling back to Firebase');
+                    try {
+                        return await CloudBackupService.backupToCloud(userId);
+                    } catch (fbError) {
+                        console.warn('Firebase also not configured:', fbError.message);
+                        // Return local backup success
+                        return {
+                            success: true,
+                            message: 'Data backed up locally (cloud storage not configured)',
+                            timestamp: new Date().toISOString(),
+                            provider: 'local'
+                        };
+                    }
+                }
+                return await R2StorageService.uploadBackup(userId, allData);
 
-        case PROVIDERS.LOCAL_ONLY:
-            return {
-                success: true,
-                message: 'Data backed up locally only',
-                timestamp: new Date().toISOString()
-            };
+            case PROVIDERS.SUPABASE:
+                console.warn('Supabase not yet implemented, falling back to Firebase');
+                try {
+                    return await CloudBackupService.backupToCloud(userId);
+                } catch (fbError) {
+                    return {
+                        success: true,
+                        message: 'Data backed up locally (cloud storage not configured)',
+                        timestamp: new Date().toISOString(),
+                        provider: 'local'
+                    };
+                }
 
-        default:
-            return await CloudBackupService.backupToCloud(userId);
+            case PROVIDERS.LOCAL_ONLY:
+                return {
+                    success: true,
+                    message: 'Data backed up locally only',
+                    timestamp: new Date().toISOString()
+                };
+
+            default:
+                try {
+                    return await CloudBackupService.backupToCloud(userId);
+                } catch (fbError) {
+                    return {
+                        success: true,
+                        message: 'Data backed up locally (cloud not available)',
+                        timestamp: new Date().toISOString(),
+                        provider: 'local'
+                    };
+                }
+        }
+    } catch (error) {
+        console.error('HybridStorage backup error:', error);
+        // Local backup already created above
+        return {
+            success: true,
+            message: 'Backed up locally (cloud backup failed: ' + error.message + ')',
+            timestamp: new Date().toISOString(),
+            provider: 'local',
+            cloudError: error.message
+        };
     }
 }
 

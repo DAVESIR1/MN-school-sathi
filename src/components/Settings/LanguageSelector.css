@@ -41,20 +41,36 @@
     position: fixed;
     inset: 0;
     z-index: 999;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
 }
 
 .language-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: 320px;
-    max-height: 400px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 360px;
+    max-height: 70vh;
     background: var(--card-bg, #fff);
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     overflow: hidden;
-    animation: dropdownSlide 0.2s ease;
+    animation: dropdownFadeIn 0.25s ease;
+}
+
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
 @keyframes dropdownSlide {
@@ -212,12 +228,7 @@
     color: #B5B5D0;
 }
 
-/* RTL Support */
-[dir="rtl"] .language-dropdown {
-    right: auto;
-    left: 0;
-}
-
+/* RTL Support - centered dropdown doesn't need RTL adjustment */
 [dir="rtl"] .lang-badge,
 [dir="rtl"] .check-icon {
     margin-left: 0;
@@ -227,8 +238,12 @@
 /* Mobile */
 @media (max-width: 480px) {
     .language-dropdown {
-        width: calc(100vw - 32px);
-        right: 16px;
-        left: 16px;
+        width: 94%;
+        max-width: none;
+        max-height: 80vh;
+    }
+
+    .language-list {
+        max-height: 60vh;
     }
 }
