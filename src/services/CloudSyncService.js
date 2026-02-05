@@ -1,6 +1,7 @@
 /**
  * Cloud Sync Service - Automatic backup/restore like Google Contacts
  * Syncs user data automatically on login and periodically
+ * With AES-256-GCM encryption for maximum security
  */
 
 import { db, isFirebaseConfigured } from '../config/firebase';
@@ -12,6 +13,7 @@ import {
     onSnapshot
 } from 'firebase/firestore';
 import * as localDb from './database';
+import { encryptData, decryptData, isEncrypted } from './SecureEncryption';
 
 // Sync status
 let syncInProgress = false;
@@ -87,11 +89,11 @@ export async function autoSyncOnLogin(userId) {
                 (cloudStudentCount > 0 || cloudStandardCount > 0)) {
                 // Restore from cloud
                 console.log('CloudSync: Local empty, restoring from cloud...');
-                await restoreFromCloudData(cloudData);
+                await restoreFromCloudData(cloudData, userId);
                 lastSyncTime = new Date();
                 notifySyncStatus({
                     type: 'restored',
-                    message: `Restored ${cloudStudentCount} students from cloud!`
+                    message: `🔓 Restored ${cloudStudentCount} students from cloud!`
                 });
                 return { success: true, action: 'restored', studentCount: cloudStudentCount };
             }
@@ -111,12 +113,11 @@ export async function autoSyncOnLogin(userId) {
                 // This ensures data isn't lost
                 if (cloudStudentCount >= localStudentCount) {
                     console.log('CloudSync: Cloud has more/equal data, syncing from cloud...');
-                    // Merge or use cloud (for simplicity, we'll prefer cloud to prevent data loss)
-                    await restoreFromCloudData(cloudData);
+                    await restoreFromCloudData(cloudData, userId);
                     lastSyncTime = new Date();
                     notifySyncStatus({
                         type: 'synced',
-                        message: 'Data synced from cloud!'
+                        message: '🔓 Data synced from cloud!'
                     });
                     return { success: true, action: 'synced_from_cloud' };
                 } else {
@@ -162,7 +163,7 @@ export async function autoSyncOnLogin(userId) {
 }
 
 /**
- * Backup current data to cloud
+ * Backup current data to cloud (with encryption)
  */
 async function backupToCloudNow(userId) {
     if (!userId || !db) throw new Error('Not configured');
@@ -187,22 +188,42 @@ async function backupToCloudNow(userId) {
         standards,
         customFields,
         ledger,
+        appVersion: '2.0.0'
+    };
+
+    // ENCRYPT DATA
+    console.log('CloudSync: Encrypting data...');
+    const encryptedPackage = await encryptData(backupData, userId);
+
+    const secureBackup = {
+        ...encryptedPackage,
         backupDate: serverTimestamp(),
         lastModified: new Date().toISOString(),
-        appVersion: '1.0.0'
+        userId: userId,
+        dataVersion: '2.0',
+        security: 'AES-256-GCM + PBKDF2 + GZIP'
     };
 
     const backupRef = doc(db, 'backups', userId);
-    await setDoc(backupRef, backupData);
-    console.log('CloudSync: Backup completed');
+    await setDoc(backupRef, secureBackup);
+    console.log('CloudSync: Encrypted backup completed');
 }
 
 /**
- * Restore data from cloud backup object
+ * Restore data from cloud backup object (with decryption)
  */
-async function restoreFromCloudData(backupData) {
-    // Clear existing data first to prevent duplicates
-    // (In a real app, you'd want smarter merging)
+async function restoreFromCloudData(storedData, userId) {
+    // DECRYPT DATA if encrypted
+    let backupData;
+    if (isEncrypted(storedData)) {
+        console.log('CloudSync: Decrypting backup data...');
+        backupData = await decryptData(storedData, userId);
+        console.log('CloudSync: Data decrypted!');
+    } else {
+        // Legacy unencrypted backup
+        console.log('CloudSync: Legacy backup (unencrypted)');
+        backupData = storedData;
+    }
 
     // Restore settings
     if (backupData.settings) {
@@ -217,7 +238,6 @@ async function restoreFromCloudData(backupData) {
             try {
                 await localDb.addStandard(standard);
             } catch (e) {
-                // Ignore duplicate errors
                 console.log('CloudSync: Standard already exists:', standard.name);
             }
         }
