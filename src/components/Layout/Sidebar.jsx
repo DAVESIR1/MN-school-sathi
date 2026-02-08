@@ -23,6 +23,7 @@ export default function Sidebar({
     setSelectedStandard,
     standards,
     onAddStandard,
+    onDeleteStandard,
     onSaveSettings,
     onOpenProfile,
     onUpgradeClass,
@@ -272,8 +273,24 @@ export default function Sidebar({
                                 <button
                                     className="btn btn-accent btn-icon"
                                     onClick={() => setShowAddStandard(!showAddStandard)}
+                                    title="Add Class"
                                 >
                                     <PlusIcon size={18} />
+                                </button>
+                                <button
+                                    className="btn btn-ghost btn-icon danger"
+                                    style={{ minWidth: '44px', minHeight: '44px' }}
+                                    onClick={() => {
+                                        if (selectedStandard && onDeleteStandard) {
+                                            // Skip confirmation - it blocks on mobile
+                                            console.log('Deleting class:', selectedStandard);
+                                            onDeleteStandard(selectedStandard);
+                                        }
+                                    }}
+                                    disabled={!selectedStandard}
+                                    title="Delete Selected Class"
+                                >
+                                    <TrashIcon size={24} color="#EF4444" />
                                 </button>
                             </div>
 

@@ -86,6 +86,36 @@ function decompressData(compressed) {
 }
 
 /**
+ * Convert Uint8Array to Base64 (handles large arrays without stack overflow)
+ */
+function uint8ArrayToBase64(uint8Array) {
+    // Process in chunks to avoid "Maximum call stack size exceeded"
+    const CHUNK_SIZE = 8192;
+    let result = '';
+
+    for (let i = 0; i < uint8Array.length; i += CHUNK_SIZE) {
+        const chunk = uint8Array.subarray(i, i + CHUNK_SIZE);
+        result += String.fromCharCode.apply(null, chunk);
+    }
+
+    return btoa(result);
+}
+
+/**
+ * Convert Base64 to Uint8Array
+ */
+function base64ToUint8Array(base64) {
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    return bytes;
+}
+
+/**
  * Encrypt data using AES-256-GCM
  * 
  * @param {Object} data - Data to encrypt
@@ -129,8 +159,8 @@ export async function encryptData(data, userId) {
         combined.set(iv, salt.length);
         combined.set(new Uint8Array(encrypted), salt.length + iv.length);
 
-        // Step 6: Convert to Base64 for storage
-        const base64 = btoa(String.fromCharCode(...combined));
+        // Step 6: Convert to Base64 for storage (chunked to prevent stack overflow)
+        const base64 = uint8ArrayToBase64(combined);
 
         console.log(`SecureEncryption: Encrypted successfully (${base64.length} chars)`);
 

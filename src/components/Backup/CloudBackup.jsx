@@ -100,40 +100,44 @@ export default function CloudBackup({ isOpen, onClose, onRestoreComplete }) {
     };
 
     const handleRestore = async () => {
+        console.log('CloudBackup: handleRestore called!', { user: !!user, backupInfo });
+
         if (!user) {
+            alert('Please login to use cloud restore');
             setStatus('error');
             setMessage('Please login to use cloud restore');
             return;
         }
 
         if (!backupInfo?.exists) {
+            alert('No backup found. Please create a backup first.');
             setStatus('error');
             setMessage('No backup found. Please create a backup first.');
             return;
         }
 
-        const confirmed = window.confirm(
-            'This will replace your current data with the backup. Are you sure?'
-        );
-
-        if (!confirmed) return;
+        // Skip confirmation - proceed directly with restore
+        console.log('CloudBackup: Proceeding with restore...');
 
         setAction('restore');
         setStatus('loading');
         setMessage('Restoring your data...');
 
         try {
+            console.log('CloudBackup: Calling restoreFromCloud...');
             const result = await restoreFromCloud(user.uid);
+            console.log('CloudBackup: Restore result:', result);
             setStatus('success');
-            setMessage(result.message);
-            if (onRestoreComplete) {
-                setTimeout(() => {
-                    onRestoreComplete();
-                }, 1000);
-            }
+            setMessage(result.message + ' Reloading page...');
+
+            // Reload the page after 1.5 seconds to refresh all data
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
         } catch (error) {
+            console.error('CloudBackup: Restore error:', error);
             setStatus('error');
-            setMessage(error.message);
+            setMessage(error.message || 'Restore failed');
         }
     };
 
@@ -201,9 +205,11 @@ export default function CloudBackup({ isOpen, onClose, onRestoreComplete }) {
 
                             <div className="action-buttons">
                                 <button className="action-btn backup-btn" onClick={handleBackup}>
-                                    <Upload size={28} />
-                                    <span className="btn-title">Backup to Cloud</span>
-                                    <span className="btn-desc">Save all data securely</span>
+                                    <Upload size={22} />
+                                    <div className="btn-text">
+                                        <span className="btn-title">Backup</span>
+                                        <span className="btn-desc">Save to cloud</span>
+                                    </div>
                                 </button>
 
                                 <button
@@ -211,13 +217,13 @@ export default function CloudBackup({ isOpen, onClose, onRestoreComplete }) {
                                     onClick={handleRestore}
                                     disabled={!backupInfo?.exists}
                                 >
-                                    <Download size={28} />
-                                    <span className="btn-title">Restore from Cloud</span>
-                                    <span className="btn-desc">
-                                        {backupInfo?.exists
-                                            ? 'Restore your saved data'
-                                            : 'No backup available'}
-                                    </span>
+                                    <Download size={22} />
+                                    <div className="btn-text">
+                                        <span className="btn-title">Restore</span>
+                                        <span className="btn-desc">
+                                            {backupInfo?.exists ? 'Get data' : 'No backup'}
+                                        </span>
+                                    </div>
                                 </button>
                             </div>
 

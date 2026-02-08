@@ -22,6 +22,7 @@ import UpgradeModal from './components/Premium/UpgradeModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserTierProvider, useUserTier } from './contexts/UserTierContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import UndoRedoBar from './components/Common/UndoRedoBar';
 import {
     useSettings,
     useStudents,
@@ -69,7 +70,7 @@ function AppContent() {
 
     // Hooks
     const { settings, updateSetting, loading: settingsLoading } = useSettings();
-    const { standards, addStandard, loading: standardsLoading } = useStandards();
+    const { standards, addStandard, deleteStandard, loading: standardsLoading } = useStandards();
     const { fields, addField, updateField, deleteField, loading: fieldsLoading } = useCustomFields();
     const { ledger, refreshLedger } = useLedger();
     const { theme, changeTheme } = useTheme();
@@ -248,6 +249,26 @@ function AppContent() {
         }
     }, [selectedStandard, students, refreshStudents]);
 
+    // Delete class/standard
+    const handleDeleteStandard = useCallback(async (standardId) => {
+        try {
+            // Delete all students in this class first
+            const studentsInClass = await db.getStudentsByStandard(standardId);
+            for (const student of studentsInClass) {
+                await db.deleteStudent(student.id);
+            }
+            // Delete the standard
+            await deleteStandard(standardId);
+            // Reset selection
+            setSelectedStandard('');
+            await refreshStudents();
+            alert(`Class "${standardId}" deleted with ${studentsInClass.length} students`);
+        } catch (error) {
+            console.error('Failed to delete class:', error);
+            alert('Failed to delete class');
+        }
+    }, [deleteStandard, refreshStudents]);
+
     // Search
     const handleSearch = useCallback(async (query) => {
         setSearchQuery(query);
@@ -330,9 +351,19 @@ function AppContent() {
         // The BackupRestore modal will show the Import tab
     }, []);
 
-    // Auth loading state - show minimal spinner instead of lock screen
+    // Auth loading state - show skeleton instead of blank screen
     if (authLoading) {
-        return null; // Don't show anything during quick auth check
+        return (
+            <div className="loading-screen auth-loading">
+                <div className="loading-content">
+                    <div className="loading-spinner">🔐</div>
+                    <h2 className="display-font">Connecting...</h2>
+                    <p style={{ color: 'var(--gray-500)', fontSize: '0.9rem' }}>
+                        Checking authentication
+                    </p>
+                </div>
+            </div>
+        );
     }
 
 
@@ -386,6 +417,7 @@ function AppContent() {
                 setSelectedStandard={setSelectedStandard}
                 standards={standards}
                 onAddStandard={addStandard}
+                onDeleteStandard={handleDeleteStandard}
                 onSaveSettings={handleSaveSettings}
                 onOpenProfile={() => setShowProfile(true)}
                 onUpgradeClass={handleUpgradeClass}
@@ -708,6 +740,9 @@ function AppContent() {
             <div className="bottom-ad-container">
                 <AdPlacement type="leaderboard" />
             </div>
+
+            {/* Undo/Redo floating bar */}
+            <UndoRedoBar />
 
             {/* Footer with Legal Links */}
             <footer className="app-footer">

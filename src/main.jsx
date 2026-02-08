@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App'
 import PrivacyPolicy from './components/Legal/PrivacyPolicy'
 import TermsOfService from './components/Legal/TermsOfService'
+import { UndoProvider } from './contexts/UndoContext'
 import './styles/design-system.css'
 
 // Error Boundary Component
@@ -77,16 +78,18 @@ class ErrorBoundary extends React.Component {
     }
 }
 
-// Wrap app with error boundary
+// Wrap app with error boundary and providers
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <ErrorBoundary>
             <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<App />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/terms" element={<TermsOfService />} />
-                </Routes>
+                <UndoProvider>
+                    <Routes>
+                        <Route path="/" element={<App />} />
+                        <Route path="/privacy" element={<PrivacyPolicy />} />
+                        <Route path="/terms" element={<TermsOfService />} />
+                    </Routes>
+                </UndoProvider>
             </BrowserRouter>
         </ErrorBoundary>
     </React.StrictMode>,

@@ -55,7 +55,7 @@ export async function backupToCloud(userId) {
         const customFields = await localDb.getAllCustomFields();
         const ledger = await localDb.getAllLedgerEntries();
 
-        console.log('CloudBackupService: Data gathered - Students:', students?.length || 0);
+        console.log('CloudBackupService: Data gathered - Students:', students?.length || 0, 'Standards:', standards?.length || 0);
 
         // Create backup object
         const backupData = {
@@ -71,15 +71,26 @@ export async function backupToCloud(userId) {
         console.log('CloudBackupService: Encrypting data with AES-256-GCM...');
         const encryptedPackage = await encryptData(backupData, userId);
 
-        // Add metadata for storage
+        // Add metadata for storage (counts stored OUTSIDE encrypted data for display)
         const secureBackup = {
             ...encryptedPackage,
             backupDate: serverTimestamp(),
             lastModified: new Date().toISOString(),
             userId: userId,
             dataVersion: '2.0',
-            security: 'AES-256-GCM + PBKDF2 + GZIP'
+            security: 'AES-256-GCM + PBKDF2 + GZIP',
+            // Store counts as unencrypted metadata (actual data is encrypted)
+            studentCount: students?.length || 0,
+            standardCount: standards?.length || 0,
+            customFieldCount: customFields?.length || 0
         };
+
+        console.log('CloudBackupService: Saving with metadata:', {
+            studentCount: secureBackup.studentCount,
+            standardCount: secureBackup.standardCount,
+            hasEncrypted: !!secureBackup.encrypted,
+            version: secureBackup.dataVersion
+        });
 
         // Save encrypted data to Firestore
         const backupRef = doc(db, 'backups', userId);
@@ -146,55 +157,55 @@ export async function restoreFromCloud(userId) {
 
         // DECRYPT DATA if encrypted
         let backupData;
+        console.log('CloudBackupService: Checking if data is encrypted...', {
+            hasEncrypted: !!storedData.encrypted,
+            version: storedData.version,
+            hasAlgorithm: !!storedData.algorithm,
+            studentCount: storedData.studentCount,
+            standardCount: storedData.standardCount
+        });
+
         if (isEncrypted(storedData)) {
             console.log('CloudBackupService: Decrypting backup data...');
             backupData = await decryptData(storedData, userId);
-            console.log('CloudBackupService: Data decrypted successfully!');
+            console.log('CloudBackupService: Data decrypted successfully!', {
+                hasSettings: !!backupData?.settings,
+                studentCount: backupData?.students?.length || 0,
+                standardCount: backupData?.standards?.length || 0
+            });
         } else {
             // Legacy unencrypted backup
             console.log('CloudBackupService: Legacy backup detected (unencrypted)');
             backupData = storedData;
         }
 
-        // Restore settings
-        if (backupData.settings) {
-            for (const [key, value] of Object.entries(backupData.settings)) {
-                await localDb.setSetting(key, value);
-            }
+        // Use importAllData for reliable restore (uses put() which upserts)
+        console.log('CloudBackupService: Starting data import...', {
+            settings: Object.keys(backupData.settings || {}).length,
+            students: backupData.students?.length || 0,
+            standards: backupData.standards?.length || 0,
+            customFields: backupData.customFields?.length || 0
+        });
+
+        // Convert settings object back to array format if needed
+        let settingsForImport = backupData.settings;
+        if (backupData.settings && !Array.isArray(backupData.settings)) {
+            settingsForImport = Object.entries(backupData.settings).map(([key, value]) => ({
+                key,
+                value,
+                updatedAt: new Date().toISOString()
+            }));
         }
 
-        // Restore standards
-        if (backupData.standards && backupData.standards.length > 0) {
-            for (const standard of backupData.standards) {
-                try {
-                    await localDb.addStandard(standard);
-                } catch (e) {
-                    console.log('Standard already exists:', standard.name);
-                }
-            }
-        }
+        // Import all data at once using reliable put() operation
+        await localDb.importAllData({
+            settings: settingsForImport,
+            students: backupData.students || [],
+            standards: backupData.standards || [],
+            customFields: backupData.customFields || []
+        });
 
-        // Restore custom fields
-        if (backupData.customFields && backupData.customFields.length > 0) {
-            for (const field of backupData.customFields) {
-                try {
-                    await localDb.addCustomField(field);
-                } catch (e) {
-                    console.log('Field already exists:', field.name);
-                }
-            }
-        }
-
-        // Restore students
-        if (backupData.students && backupData.students.length > 0) {
-            for (const student of backupData.students) {
-                try {
-                    await localDb.addStudent(student);
-                } catch (e) {
-                    console.log('Student already exists:', student.grNo);
-                }
-            }
-        }
+        console.log('CloudBackupService: Data import complete!');
 
         return {
             success: true,
@@ -223,9 +234,58 @@ export async function checkBackupExists(userId) {
 
         if (backupSnap.exists()) {
             const data = backupSnap.data();
+
+            // Debug: log all top-level fields
+            console.log('CloudBackupService: checkBackupExists raw data:', {
+                keys: Object.keys(data),
+                studentCount: data.studentCount,
+                standardCount: data.standardCount,
+                hasEncrypted: !!data.encrypted,
+                version: data.version || data.dataVersion
+            });
+
+            // If metadata exists, use it directly
+            if (data.studentCount !== undefined && data.studentCount > 0) {
+                return {
+                    exists: true,
+                    lastBackup: data.backupDate?.toDate?.() || data.lastModified || null,
+                    studentCount: data.studentCount,
+                    standardCount: data.standardCount || 0
+                };
+            }
+
+            // For old backups without metadata, try to decrypt and count
+            if (isEncrypted(data)) {
+                try {
+                    console.log('CloudBackupService: Decrypting to get student count...');
+                    const decrypted = await decryptData(data, userId);
+                    const studentCount = decrypted?.students?.length || 0;
+                    const standardCount = decrypted?.standards?.length || 0;
+
+                    console.log('CloudBackupService: Decrypted counts:', { studentCount, standardCount });
+
+                    // Update the document with metadata for future reads (don't wait)
+                    setDoc(backupRef, {
+                        ...data,
+                        studentCount,
+                        standardCount
+                    }).catch(e => console.warn('Failed to update metadata:', e));
+
+                    return {
+                        exists: true,
+                        lastBackup: data.backupDate?.toDate?.() || data.lastModified || null,
+                        studentCount,
+                        standardCount
+                    };
+                } catch (decryptError) {
+                    console.error('CloudBackupService: Decrypt for count failed:', decryptError);
+                }
+            }
+
+            // Fallback for unencrypted legacy data
             return {
                 exists: true,
-                lastBackup: data.backupDate?.toDate?.() || null,
+                lastBackup: data.backupDate?.toDate?.() || data.lastModified || null,
                 studentCount: data.students?.length || 0,
                 standardCount: data.standards?.length || 0
             };

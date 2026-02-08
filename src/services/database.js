@@ -282,20 +282,35 @@ export async function exportAllData() {
 export async function importAllData(data) {
     const db = await initDB();
 
+    console.log('importAllData: Starting import with:', {
+        settingsCount: data.settings?.length || 0,
+        studentsCount: data.students?.length || 0,
+        standardsCount: data.standards?.length || 0,
+        customFieldsCount: data.customFields?.length || 0
+    });
+
     if (data.settings) {
         const tx = db.transaction('settings', 'readwrite');
         for (const item of data.settings) {
             await tx.store.put(item);
         }
         await tx.done;
+        console.log('importAllData: Settings imported');
     }
 
-    if (data.students) {
+    if (data.students && data.students.length > 0) {
+        console.log('importAllData: Importing students...');
+        // Log first 3 students to verify data
+        data.students.slice(0, 3).forEach((s, i) => {
+            console.log(`  Student ${i + 1}: ID=${s.id}, GR=${s.grNo}, Name="${s.name}"`);
+        });
+
         const tx = db.transaction('students', 'readwrite');
         for (const item of data.students) {
             await tx.store.put(item);
         }
         await tx.done;
+        console.log('importAllData: All students imported');
     }
 
     if (data.standards) {
@@ -304,6 +319,7 @@ export async function importAllData(data) {
             await tx.store.put(item);
         }
         await tx.done;
+        console.log('importAllData: Standards imported');
     }
 
     if (data.customFields) {
@@ -312,8 +328,10 @@ export async function importAllData(data) {
             await tx.store.put(item);
         }
         await tx.done;
+        console.log('importAllData: Custom fields imported');
     }
 
+    console.log('importAllData: COMPLETE');
     return true;
 }
 

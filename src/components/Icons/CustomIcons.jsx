@@ -445,6 +445,20 @@ export const MessageCircleIcon = ({ size = 24, className = '' }) => (
     </svg>
 );
 
+export const RotateCcwIcon = ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+        <path d="M8 16C8 16 12 8 24 8C36 8 42 20 42 24C42 36 32 42 24 42C16 42 8 36 8 24" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M8 6V16H18" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
+export const RotateCwIcon = ({ size = 24, className = '' }) => (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+        <path d="M40 16C40 16 36 8 24 8C12 8 6 20 6 24C6 36 16 42 24 42C32 42 40 36 40 24" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M40 6V16H30" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+);
+
 // Export all icons as a map for easy lookup
 export const IconMap = {
     studentProfile: StudentProfileIcon,
