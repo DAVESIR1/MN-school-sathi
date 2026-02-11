@@ -1,0 +1,224 @@
+.universal-export {
+    padding: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.export-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.export-header h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary, #1a1a2e);
+}
+
+.export-section {
+    margin-bottom: 20px;
+}
+
+.section-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary, #6b7280);
+    margin-bottom: 10px;
+}
+
+.format-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.format-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 8px;
+    border: 2px solid var(--border, #e5e7eb);
+    border-radius: 12px;
+    background: var(--bg-card, #fff);
+    cursor: pointer;
+    transition: all 0.05s;
+}
+
+.format-btn:hover {
+    border-color: var(--primary, #7C3AED);
+    transform: translateY(-1px);
+}
+
+.format-btn.active {
+    border-color: var(--primary, #7C3AED);
+    background: rgba(124, 58, 237, 0.06);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.format-icon {
+    font-size: 24px;
+}
+
+.format-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a2e);
+}
+
+.settings-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.setting-group {
+    flex: 1;
+    min-width: 120px;
+}
+
+.setting-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary, #6b7280);
+    margin-bottom: 4px;
+}
+
+.setting-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border, #d1d5db);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--bg-card, #fff);
+    color: var(--text-primary, #1a1a2e);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary, #374151);
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary, #7C3AED);
+}
+
+.preview-table {
+    max-height: 200px;
+    overflow: auto;
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 10px;
+}
+
+.preview-table table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.preview-table th {
+    background: var(--bg-main, #f3f4f6);
+    padding: 8px 10px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-secondary, #6b7280);
+    position: sticky;
+    top: 0;
+}
+
+.preview-table td {
+    padding: 6px 10px;
+    border-top: 1px solid var(--border, #f3f4f6);
+    color: var(--text-primary, #374151);
+}
+
+.no-data {
+    padding: 24px;
+    text-align: center;
+    color: var(--text-secondary, #9ca3af);
+    font-size: 14px;
+}
+
+.more-rows {
+    padding: 6px 10px;
+    text-align: center;
+    color: var(--text-secondary, #9ca3af);
+    font-size: 11px;
+    background: var(--bg-main, #f9fafb);
+}
+
+.export-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.export-actions .btn {
+    flex-shrink: 0;
+}
+
+.export-actions .btn-lg {
+    flex: 1;
+    min-width: 160px;
+}
+
+/* Dark theme */
+[data-theme="dark"] .format-btn {
+    background: #1a1625;
+    border-color: #3d3555;
+}
+
+[data-theme="dark"] .format-btn.active {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: #8B5CF6;
+}
+
+[data-theme="dark"] .preview-table {
+    border-color: #3d3555;
+}
+
+[data-theme="dark"] .preview-table th {
+    background: #2d2640;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .universal-export {
+        padding: 16px;
+    }
+
+    .format-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .settings-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .export-actions {
+        flex-direction: column;
+    }
+
+    .export-actions .btn {
+        width: 100%;
+    }
+}

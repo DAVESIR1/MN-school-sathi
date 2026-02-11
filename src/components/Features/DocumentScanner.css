@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    /* blur removed */
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -56,7 +56,7 @@
     cursor: pointer;
     color: white;
     display: flex;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .doc-scanner-header .close-btn:hover {
@@ -82,7 +82,7 @@
     padding: 40px 24px;
     text-align: center;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.05s ease;
 }
 
 .option-card:hover {
@@ -161,7 +161,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .capture-btn:hover {
@@ -207,13 +207,10 @@
 }
 
 .scanning-overlay .spin {
-    animation: spin 1s linear infinite;
+    animation: none;
 }
 
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
+/* keyframe removed */
 
     to {
         transform: rotate(360deg);
@@ -258,7 +255,7 @@
     align-items: center;
     gap: 8px;
     border: none;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .scan-btn {

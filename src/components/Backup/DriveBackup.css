@@ -5,12 +5,12 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
+    /* blur removed */
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    animation: fadeIn 0.2s ease;
+    animation: none;
 }
 
 .drive-backup-modal {
@@ -21,14 +21,10 @@
     max-height: 85vh;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.3s ease;
+    animation: none;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
+/* keyframe removed */
     to {
         opacity: 1;
         transform: translateY(0);
@@ -68,7 +64,7 @@
     align-items: center;
     justify-content: center;
     color: white;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .drive-backup-header .close-btn:hover {
@@ -98,7 +94,7 @@
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--text-muted, #666);
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .tab-btn:hover {
@@ -120,7 +116,7 @@
     margin: 12px 16px 0;
     border-radius: 10px;
     font-size: 0.9rem;
-    animation: fadeIn 0.3s ease;
+    animation: none;
 }
 
 .status-message.error {
@@ -174,7 +170,7 @@
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.05s ease;
 }
 
 .connect-btn:hover:not(:disabled) {
@@ -218,7 +214,7 @@
     border-radius: 8px;
     font-size: 0.85rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .disconnect-btn:hover {
@@ -244,7 +240,7 @@
     font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .action-btn.backup {
@@ -278,11 +274,10 @@
 }
 
 .spin {
-    animation: spin 1s linear infinite;
+    animation: none;
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
+/* keyframe removed */
     to { transform: rotate(360deg); }
 }
 
@@ -327,7 +322,7 @@
     background: var(--bg-secondary, #f8f9fa);
     border-radius: 10px;
     margin-bottom: 8px;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .backup-item:hover {
@@ -368,7 +363,7 @@
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .restore-btn:hover:not(:disabled) {
@@ -386,7 +381,7 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .delete-btn:hover:not(:disabled) {

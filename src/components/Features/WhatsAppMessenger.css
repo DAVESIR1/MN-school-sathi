@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    /* blur removed */
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -131,7 +131,7 @@
     background: var(--bg-card);
     border-radius: 10px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .student-item:hover {
@@ -158,7 +158,7 @@
     justify-content: center;
     color: white;
     background: transparent;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .student-item.selected .check-box {
@@ -222,7 +222,7 @@
     font-size: 0.85rem;
     color: var(--text-primary);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .template-btn:hover {
@@ -346,7 +346,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .send-btn:hover:not(:disabled) {

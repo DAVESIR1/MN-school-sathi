@@ -60,7 +60,7 @@
     border: 1px solid var(--border-color, #e5e7eb);
     border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
     position: relative;
 }
 

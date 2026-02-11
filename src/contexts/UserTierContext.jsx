@@ -1,5 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { getPlanInfo, activateProCode, checkExpiryReminder, getTrialDaysRemaining, hasFeature } from '../services/SubscriptionManager';
 
 // Admin credentials (hardcoded for security)
 const ADMIN_EMAIL = 'baraiyanitin220@gmail.com';
@@ -118,6 +119,40 @@ export function UserTierProvider({ children }) {
         }));
     };
 
+    // Subscription Manager integration
+    const [trialDaysRemaining, setTrialDaysRemaining] = useState(null);
+    const [expiryWarning, setExpiryWarning] = useState(null);
+
+    // Check subscription status on mount
+    useEffect(() => {
+        const planInfo = getPlanInfo();
+        if (planInfo.daysRemaining !== null) {
+            setTrialDaysRemaining(planInfo.daysRemaining);
+        }
+        const reminder = checkExpiryReminder();
+        if (reminder.expiringSoon || reminder.critical || reminder.expired) {
+            setExpiryWarning(reminder);
+        }
+    }, [tier]);
+
+    // Activate pro code
+    const activateCode = useCallback((code, email) => {
+        const result = activateProCode(code, email);
+        if (result.success) {
+            setTier(USER_TIERS.PREMIUM);
+            setIsPremium(true);
+            setPremiumExpiry(result.endDate);
+        }
+        return result;
+    }, []);
+
+    // Check feature access
+    const checkFeature = useCallback((featureId) => {
+        if (tier === USER_TIERS.ADMIN) return true;
+        if (isPremium) return true;
+        return hasFeature(featureId);
+    }, [tier, isPremium]);
+
     const value = {
         tier,
         isPremium,
@@ -129,6 +164,10 @@ export function UserTierProvider({ children }) {
         upgradeToPremium,
         cancelPremium,
         grantPremium,
+        activateCode,
+        checkFeature,
+        trialDaysRemaining,
+        expiryWarning,
         features: PREMIUM_FEATURES,
         pricing: PREMIUM_PRICING
     };

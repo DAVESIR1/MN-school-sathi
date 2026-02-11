@@ -9,6 +9,7 @@ import {
     signOut
 } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseConfigured } from '../config/firebase';
+import { logSecurityEvent } from '../services/SecurityManager';
 
 const AuthContext = createContext(null);
 
@@ -106,8 +107,10 @@ export function AuthProvider({ children }) {
         try {
             setError(null);
             const result = await signInWithEmailAndPassword(auth, email, password);
+            logSecurityEvent('login', { method: 'email', email });
             return { success: true, user: result.user };
         } catch (err) {
+            logSecurityEvent('login_failed', { method: 'email', email, error: err.code });
             const message = getErrorMessage(err.code);
             setError(message);
             return { success: false, error: message };
@@ -123,6 +126,7 @@ export function AuthProvider({ children }) {
         try {
             setError(null);
             const result = await signInWithPopup(auth, googleProvider);
+            logSecurityEvent('login', { method: 'google', email: result.user?.email });
             return { success: true, user: result.user };
         } catch (err) {
             const message = getErrorMessage(err.code);
@@ -196,6 +200,7 @@ export function AuthProvider({ children }) {
         }
         try {
             await signOut(auth);
+            logSecurityEvent('logout');
             return { success: true };
         } catch (err) {
             setError('Failed to logout. Please try again.');

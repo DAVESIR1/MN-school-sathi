@@ -51,12 +51,7 @@
     /* Animation removed */
 }
 
-@keyframes float {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
+/* keyframe removed */
 
     50% {
         transform: translateY(-30px);
@@ -70,7 +65,7 @@
     width: 100%;
     max-width: 420px;
     background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(20px);
+    /* blur removed */
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-large);
     padding: var(--space-8);
@@ -90,12 +85,7 @@
     /* Animation removed */
 }
 
-@keyframes bounce {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
+/* keyframe removed */
 
     50% {
         transform: translateY(-10px);
@@ -311,13 +301,10 @@
 }
 
 .auth-submit .spin {
-    animation: spin 1s linear infinite;
+    animation: none;
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
+/* keyframe removed */
 
     100% {
         transform: rotate(360deg);

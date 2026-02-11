@@ -1,0 +1,255 @@
+.student-login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 24px;
+}
+
+.student-login-card {
+    background: var(--bg-card, #fff);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    padding: 32px;
+    max-width: 440px;
+    width: 100%;
+}
+
+.login-card-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.login-card-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text-primary, #1a1a2e);
+}
+
+.login-card-header p {
+    color: var(--text-secondary, #6b7280);
+    font-size: 14px;
+}
+
+.login-method-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: var(--bg-main, #f3f4f6);
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.method-tab {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary, #6b7280);
+    transition: all 0.05s;
+}
+
+.method-tab.active {
+    background: var(--bg-card, #fff);
+    color: var(--primary, #7C3AED);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.login-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.login-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.login-form .form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary, #374151);
+}
+
+.login-form .input-field {
+    padding: 12px 14px;
+    border: 1.5px solid var(--border, #d1d5db);
+    border-radius: 10px;
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+
+.login-form .input-field:focus {
+    border-color: var(--primary, #7C3AED);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.otp-field {
+    text-align: center;
+    letter-spacing: 12px;
+    font-size: 24px !important;
+    font-weight: 700;
+}
+
+.back-btn {
+    margin-top: 8px;
+    font-size: 13px;
+}
+
+/* Student Profile View */
+.student-profile-view {
+    background: var(--bg-card, #fff);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+    width: 100%;
+    max-width: 700px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.profile-photo-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #7C3AED, #6D28D9);
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+}
+
+.profile-name-section {
+    flex: 1;
+}
+
+.profile-name-section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--text-primary, #1a1a2e);
+}
+
+.profile-class {
+    font-size: 13px;
+    color: var(--primary, #7C3AED);
+    font-weight: 600;
+}
+
+.profile-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.profile-detail-card {
+    background: var(--bg-main, #f9fafb);
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border, #e5e7eb);
+}
+
+.detail-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary, #6b7280);
+    margin-bottom: 4px;
+}
+
+.detail-value {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a2e);
+    word-break: break-word;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Dark theme */
+[data-theme="dark"] .student-login-card,
+[data-theme="dark"] .student-profile-view {
+    background: #1a1625;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .login-error {
+    background: #451a1a;
+    border-color: #7f1d1d;
+    color: #fca5a5;
+}
+
+[data-theme="dark"] .method-tab.active {
+    background: #2d2640;
+}
+
+[data-theme="dark"] .profile-detail-card {
+    background: #2d2640;
+    border-color: #3d3555;
+}
+
+@media (max-width: 640px) {
+    .student-login-container {
+        padding: 12px;
+    }
+
+    .student-login-card {
+        padding: 20px;
+    }
+
+    .profile-details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}

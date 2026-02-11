@@ -104,6 +104,14 @@ export default function Sidebar({
 
     return (
         <>
+            {/* Mobile backdrop overlay - closes sidebar on tap */}
+            {isOpen && (
+                <div
+                    className="sidebar-backdrop"
+                    onClick={onToggle}
+                    aria-hidden="true"
+                />
+            )}
             <aside className={`sidebar ${isOpen ? 'open' : 'collapsed'}`}>
                 <div className="sidebar-header">
                     <div className="sidebar-logo">

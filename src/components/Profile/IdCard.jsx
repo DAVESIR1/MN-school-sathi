@@ -29,10 +29,20 @@ const AVAILABLE_FIELDS = [
     { id: 'email', label: 'Email', default: false },
     { id: 'dob', label: 'Date of Birth', default: false },
     { id: 'fatherName', label: 'Father Name', default: false },
+    { id: 'motherName', label: 'Mother Name', default: false },
+    { id: 'fatherContact', label: "Father's Contact", default: false },
     { id: 'bloodGroup', label: 'Blood Group', default: false },
     { id: 'address', label: 'Address', default: false },
     { id: 'section', label: 'Section', default: false },
-    { id: 'admissionDate', label: 'Admission Date', default: false }
+    { id: 'admissionDate', label: 'Admission Date', default: false },
+    { id: 'nationality', label: 'Nationality', default: false },
+    { id: 'religion', label: 'Religion', default: false },
+    { id: 'caste', label: 'Caste', default: false },
+    { id: 'category', label: 'Category (Gen/OBC/SC/ST)', default: false },
+    { id: 'aadharNo', label: 'Aadhaar Number', default: false },
+    { id: 'samagraId', label: 'Samagra ID', default: false },
+    { id: 'transportRoute', label: 'Transport Route', default: false },
+    { id: 'house', label: 'House', default: false }
 ];
 
 // Default visible fields
@@ -64,10 +74,20 @@ const IdCard = forwardRef(({
         email: { label: '✉️', value: student.email || schoolEmail || '' },
         dob: { label: 'DOB', value: student.dateOfBirth || '—' },
         fatherName: { label: "Father's Name", value: student.fatherName || '—' },
+        motherName: { label: "Mother's Name", value: student.motherName || '—' },
+        fatherContact: { label: "Father's Ph.", value: student.fatherContact || student.parentContact || '—' },
         bloodGroup: { label: 'Blood', value: student.bloodGroup || '—' },
         address: { label: 'Address', value: student.address || '—' },
         section: { label: 'Section', value: student.section || '—' },
-        admissionDate: { label: 'Admitted', value: student.admissionDate || '—' }
+        admissionDate: { label: 'Admitted', value: student.admissionDate || '—' },
+        nationality: { label: 'Nationality', value: student.nationality || '—' },
+        religion: { label: 'Religion', value: student.religion || '—' },
+        caste: { label: 'Caste', value: student.caste || '—' },
+        category: { label: 'Category', value: student.category || '—' },
+        aadharNo: { label: 'Aadhaar', value: student.aadharNo || student.aadhaarNo || '—' },
+        samagraId: { label: 'Samagra ID', value: student.samagraId || '—' },
+        transportRoute: { label: 'Transport', value: student.transportRoute || '—' },
+        house: { label: 'House', value: student.house || '—' }
     };
 
     // Split visible fields into main fields and contact fields

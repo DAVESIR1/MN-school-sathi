@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    /* blur removed */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -20,14 +20,10 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    animation: slideUp 0.3s ease;
+    animation: none;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+/* keyframe removed */
 
     to {
         opacity: 1;
@@ -68,7 +64,7 @@
     font-weight: 500;
     color: var(--gray-600);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .tab-btn:hover {
@@ -109,7 +105,7 @@
     border: 2px solid rgba(var(--primary-rgb, 147, 51, 234), 0.2);
     border-radius: var(--radius-lg, 12px);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .backup-option:hover {

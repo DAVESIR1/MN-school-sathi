@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    backdrop-filter: blur(4px);
+    /* blur removed */
 }
 
 .qr-modal {
@@ -93,7 +93,7 @@
     border-radius: 8px;
     cursor: pointer;
     text-align: left;
-    transition: all 0.2s;
+    transition: all 0.05s;
     color: var(--text-primary, #333);
 }
 

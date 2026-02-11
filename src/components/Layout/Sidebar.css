@@ -4,7 +4,7 @@
     top: 0;
     height: 100vh;
     background: var(--bg-sidebar);
-    backdrop-filter: blur(20px);
+    /* blur removed */
     border-right: 2px solid rgba(255, 255, 255, 0.3);
     box-shadow: var(--shadow-large);
     z-index: var(--z-sticky);
@@ -517,7 +517,7 @@
     border: none;
     font-weight: 600;
     box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
-    transition: all 0.3s ease;
+    transition: all 0.05s ease;
 }
 
 .sidebar-action-btn.gradient-btn:hover {
@@ -705,8 +705,25 @@
     color: #6b7280;
 }
 
+/* Sidebar backdrop overlay - only visible on mobile */
+.sidebar-backdrop {
+    display: none;
+}
+
 /* ================== MOBILE RESPONSIVE FIXES ================== */
 @media (max-width: 768px) {
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        cursor: pointer;
+    }
+
+    .sidebar {
+        z-index: 999;
+    }
 
     /* Sidebar as slide-in overlay - not full width */
     .sidebar {

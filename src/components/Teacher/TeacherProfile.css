@@ -1,0 +1,313 @@
+.teacher-profile {
+    padding: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.profile-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: var(--text-primary, #1f2937);
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Profile Card */
+.profile-card {
+    background: var(--surface-color, white);
+    border-radius: 20px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    overflow: hidden;
+}
+
+/* Photo Section */
+.photo-section {
+    text-align: center;
+    padding: 40px 24px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.photo-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.profile-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.photo-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 4px solid rgba(255, 255, 255, 0.4);
+    color: white;
+}
+
+.photo-upload-btn {
+    display: block;
+    margin-top: 12px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.photo-upload-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.profile-name {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.profile-designation {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.85;
+}
+
+/* Details */
+.profile-details {
+    padding: 28px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-item label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary, #6b7280);
+}
+
+.field-value {
+    font-size: 15px;
+    color: var(--text-primary, #1f2937);
+    padding: 8px 0;
+}
+
+.empty-val {
+    color: var(--text-secondary, #9ca3af);
+    font-style: italic;
+}
+
+.input-field {
+    padding: 10px 14px;
+    border: 2px solid var(--border-color, #e5e7eb);
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    background: var(--input-bg, white);
+    color: var(--text-primary, #1f2937);
+}
+
+.input-field:focus {
+    border-color: #667eea;
+}
+
+.input-field.textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* Custom Section */
+.custom-section {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-color, #e5e7eb);
+}
+
+.custom-section h4 {
+    margin: 0 0 16px;
+    font-size: 16px;
+    color: var(--text-primary, #1f2937);
+}
+
+.custom-field-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.custom-field-row .input-field {
+    flex: 1;
+}
+
+.custom-label {
+    font-weight: 600;
+    color: var(--text-primary, #1f2937);
+    min-width: 140px;
+}
+
+.custom-value {
+    color: var(--text-secondary, #6b7280);
+}
+
+.remove-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 68, 68, 0.1);
+    color: #EF4444;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.remove-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.add-field-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    border: 2px dashed var(--border-color, #d1d5db);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-secondary, #6b7280);
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+.add-field-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+/* Buttons */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--hover-bg, #f3f4f6);
+    color: var(--text-primary, #1f2937);
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: var(--border-color, #e5e7eb);
+}
+
+/* Dark Theme */
+[data-theme="dark"] .profile-card {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme="dark"] .input-field {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
+
+/* Print */
+@media print {
+    .header-actions {
+        display: none !important;
+    }
+
+    .teacher-profile {
+        padding: 0;
+    }
+
+    .profile-card {
+        border: none;
+        box-shadow: none;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .teacher-profile {
+        padding: 16px;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .custom-field-row {
+        flex-direction: column;
+    }
+}

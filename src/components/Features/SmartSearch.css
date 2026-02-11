@@ -7,7 +7,7 @@
     justify-content: center;
     padding-top: 10vh;
     z-index: 1000;
-    backdrop-filter: blur(4px);
+    /* blur removed */
 }
 
 .smart-search-modal {
@@ -104,7 +104,7 @@
     font-weight: 500;
     cursor: pointer;
     color: var(--text-secondary, #666);
-    transition: all 0.2s;
+    transition: all 0.05s;
     white-space: nowrap;
 }
 
@@ -169,7 +169,7 @@
     border-radius: 12px;
     cursor: pointer;
     text-align: left;
-    transition: all 0.2s;
+    transition: all 0.05s;
     color: var(--text-primary, #333);
 }
 

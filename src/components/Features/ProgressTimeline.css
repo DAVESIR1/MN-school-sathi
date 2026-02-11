@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    /* blur removed */
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -147,7 +147,7 @@
     gap: 16px;
     position: relative;
     border-left: 4px solid var(--accent-color);
-    transition: all 0.3s;
+    transition: all 0.05s ease;
 }
 
 .milestone-card:hover {
@@ -238,7 +238,7 @@
     cursor: pointer;
     color: #ef4444;
     opacity: 0;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .milestone-card:hover .remove-btn {
@@ -339,7 +339,7 @@
     justify-content: center;
     gap: 8px;
     margin-top: 16px;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .add-milestone-btn:hover {

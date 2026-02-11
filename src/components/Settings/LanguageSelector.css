@@ -12,7 +12,7 @@
     border-radius: 10px;
     cursor: pointer;
     font-size: 0.9rem;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .language-trigger:hover {
@@ -42,7 +42,7 @@
     inset: 0;
     z-index: 999;
     background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
+    /* blur removed */
 }
 
 .language-dropdown {
@@ -58,14 +58,10 @@
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     z-index: 1000;
     overflow: hidden;
-    animation: dropdownFadeIn 0.25s ease;
+    animation: none;
 }
 
-@keyframes dropdownFadeIn {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.95);
-    }
+/* keyframe removed */
 
     to {
         opacity: 1;
@@ -73,11 +69,7 @@
     }
 }
 
-@keyframes dropdownSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
+/* keyframe removed */
 
     to {
         opacity: 1;
@@ -191,7 +183,7 @@
 
 [data-theme="dark"] .language-dropdown {
     background: rgba(30, 30, 45, 0.98);
-    backdrop-filter: blur(20px);
+    /* blur removed */
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 

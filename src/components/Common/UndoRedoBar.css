@@ -6,7 +6,7 @@
     display: flex;
     gap: 8px;
     background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    /* blur removed */
     padding: 8px 16px;
     border-radius: 50px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -29,7 +29,7 @@
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all 0.05s ease;
     background: transparent;
     color: #666;
 }

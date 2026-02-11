@@ -23,6 +23,17 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UserTierProvider, useUserTier } from './contexts/UserTierContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import UndoRedoBar from './components/Common/UndoRedoBar';
+import { useMenu } from './contexts/MenuContext';
+import MainMenu from './components/Menu/MainMenu';
+import SchoolProfile from './components/School/SchoolProfile';
+import StaffInfo from './components/HOI/StaffInfo';
+import HOIDiary from './components/HOI/HOIDiary';
+import CustomWindowCreator from './components/Common/CustomWindowCreator';
+import ComingSoonPage from './components/Common/ComingSoonPage';
+import SalaryBook from './components/Teacher/SalaryBook';
+import TeacherProfile from './components/Teacher/TeacherProfile';
+import TeachersProfileList from './components/School/TeachersProfileList';
+import StudentLogin from './components/Student/StudentLogin';
 import {
     useSettings,
     useStudents,
@@ -35,6 +46,7 @@ import * as db from './services/database';
 import * as LocalBackupService from './services/LocalBackupService';
 import * as MandatoryBackupService from './services/MandatoryBackupService';
 import * as CloudSyncService from './services/CloudSyncService';
+import { selfRepairCheck, isIPBlocked } from './services/SecurityManager';
 import { Menu, Users, FileSpreadsheet, Sparkles, Download, Share2, Maximize2, Minimize2, Cloud, CloudOff, Check, Loader } from 'lucide-react';
 import './App.css';
 
@@ -67,6 +79,11 @@ function AppContent() {
     const [showPhotoEnhance, setShowPhotoEnhance] = useState(false);
     const [backupAction, setBackupAction] = useState('export');
     const [syncStatus, setSyncStatus] = useState(null);
+
+    // Menu state for 5-menu navigation
+    const { activeMenu, activeSubItem, selectSubItem } = useMenu();
+    const [showMenuContent, setShowMenuContent] = useState(false);
+    const [menuContentType, setMenuContentType] = useState(null);
 
     // Hooks
     const { settings, updateSetting, loading: settingsLoading } = useSettings();
@@ -104,6 +121,18 @@ function AppContent() {
             setIsReady(true);
         }
     }, [settings, settingsLoading]);
+
+    // ESC key handler for maximized form and menu content
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                if (isFormMaximized) setIsFormMaximized(false);
+                if (showMenuContent) { setShowMenuContent(false); setMenuContentType(null); }
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isFormMaximized, showMenuContent]);
 
     // Auto-sync on login (like Google Contacts)
     useEffect(() => {
@@ -150,6 +179,17 @@ function AppContent() {
             try {
                 // Initialize mandatory backup (periodic, unload, visibility)
                 MandatoryBackupService.initMandatoryBackup();
+
+                // Run security self-repair on startup
+                try {
+                    selfRepairCheck();
+                    const blocked = await isIPBlocked();
+                    if (blocked) {
+                        console.warn('Security: This IP is currently blocked.');
+                    }
+                } catch (secErr) {
+                    console.warn('SecurityManager startup check skipped:', secErr.message);
+                }
 
                 // Check if version changed (potential data loss scenario)
                 if (LocalBackupService.hasVersionChanged()) {
@@ -269,6 +309,136 @@ function AppContent() {
         }
     }, [deleteStandard, refreshStudents]);
 
+    // Handle menu navigation from MainMenu component
+    const handleMenuNavigate = useCallback((menuId, itemId) => {
+        console.log('Menu navigate:', menuId, itemId);
+        setMenuContentType(itemId);
+        setShowMenuContent(true);
+        // Close other modals when menu is opened
+        setShowProfile(false);
+        setShowLedger(false);
+        setShowCertificate(false);
+        setShowAnalytics(false);
+        setShowCloudBackup(false);
+    }, []);
+
+    // Render menu content based on activeSubItem
+    const renderMenuContent = () => {
+        if (!showMenuContent || !menuContentType) return null;
+
+        switch (menuContentType) {
+            // School menu items
+            case 'school-profile':
+                return <SchoolProfile
+                    schoolName={schoolName}
+                    schoolContact={schoolContact}
+                    schoolEmail={schoolEmail}
+                    schoolLogo={schoolLogo}
+                />;
+            case 'general-register':
+                setShowLedger(true);
+                setShowMenuContent(false);
+                return null;
+            case 'student-profile':
+                setShowProfile(true);
+                setShowMenuContent(false);
+                return null;
+            case 'certificate':
+                setShowCertificate(true);
+                setShowMenuContent(false);
+                return null;
+            case 'id-card':
+                // Open profile viewer which has ID card tab
+                setShowProfile(true);
+                setShowMenuContent(false);
+                return null;
+            case 'teachers-profile':
+                return <TeachersProfileList />;
+            case 'custom-window':
+            case 'custom-window-hoi':
+            case 'custom-window-teacher':
+                return <CustomWindowCreator
+                    menuId={activeMenu}
+                    onSave={() => setShowMenuContent(false)}
+                    onCancel={() => setShowMenuContent(false)}
+                />;
+
+            // HOI menu items
+            case 'staff-info':
+                return <StaffInfo />;
+            case 'hoi-diary':
+                return <HOIDiary />;
+
+            // Teacher menu items
+            case 'self-profile':
+                return <TeacherProfile />;
+            case 'salary-book':
+                return <SalaryBook />;
+            case 'special-features':
+                return (
+                    <div style={{ padding: '20px' }}>
+                        <h2 style={{ marginBottom: '16px', fontSize: '1.5rem' }}>✨ Special Features</h2>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                            {[
+                                { icon: '📷', name: 'Document Scanner', key: 'doc-scanner', onClick: () => { setShowDocScanner(true); setShowMenuContent(false); } },
+                                { icon: '🎙️', name: 'Voice Input', key: 'voice', onClick: () => { setShowVoiceInput(true); setShowMenuContent(false); } },
+                                { icon: '📊', name: 'Analytics Dashboard', key: 'analytics', onClick: () => { setShowAnalytics(true); setShowMenuContent(false); } },
+                                { icon: '📱', name: 'QR Attendance', key: 'qr', onClick: () => { setShowQRAttendance(true); setShowMenuContent(false); } },
+                                { icon: '🔍', name: 'Smart Search', key: 'search', onClick: () => { setShowSmartSearch(true); setShowMenuContent(false); } },
+                                { icon: '🖼️', name: 'Photo Enhancement', key: 'photo', onClick: () => { setShowPhotoEnhance(true); setShowMenuContent(false); } },
+                                { icon: '👨‍👩‍👧', name: 'Family Tree', key: 'family', onClick: () => { setShowFamilyTree(true); setShowMenuContent(false); } },
+                                { icon: '📈', name: 'Progress Timeline', key: 'timeline', onClick: () => { setShowTimeline(true); setShowMenuContent(false); } },
+                                { icon: '💬', name: 'WhatsApp Messenger', key: 'whatsapp', onClick: () => { setShowWhatsApp(true); setShowMenuContent(false); } },
+                            ].map(f => (
+                                <button key={f.key} onClick={f.onClick} style={{
+                                    display: 'flex', alignItems: 'center', gap: '10px', padding: '16px',
+                                    borderRadius: '12px', border: '1px solid var(--border-color, #e2e8f0)',
+                                    background: 'var(--bg-secondary, #f8fafc)', cursor: 'pointer',
+                                    fontSize: '0.95rem', transition: 'all 0.2s',
+                                }}>
+                                    <span style={{ fontSize: '1.5rem' }}>{f.icon}</span>
+                                    {f.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            case 'class-management':
+            case 'class-management-teacher':
+                // Already handled by sidebar
+                setShowMenuContent(false);
+                return null;
+
+            // Student menu items
+            case 'student-login':
+                return <StudentLogin onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} />;
+            case 'student-view-profile':
+                setShowProfile(true);
+                setShowMenuContent(false);
+                return null;
+            case 'download-id-card':
+                // ID Card is part of the profile viewer
+                setShowProfile(true);
+                setShowMenuContent(false);
+                return null;
+
+            // Coming Soon items
+            case 'dead-stock':
+            case 'audit-register':
+            case 'bill-register':
+            case 'news-circulars':
+            case 'programs-events':
+            case 'activity-gallery':
+            case 'self-update':
+            case 'download-certificate':
+            case 'qa-chat':
+                return <ComingSoonPage featureId={menuContentType} onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} />;
+
+            default:
+                return <ComingSoonPage featureId={menuContentType} onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} />;
+        }
+    };
+
     // Search
     const handleSearch = useCallback(async (query) => {
         setSearchQuery(query);
@@ -351,17 +521,37 @@ function AppContent() {
         // The BackupRestore modal will show the Import tab
     }, []);
 
-    // Auth loading state - show skeleton instead of blank screen
+    // Auth loading state - instantly visible skeleton (no CSS variable dependency)
     if (authLoading) {
         return (
-            <div className="loading-screen auth-loading">
-                <div className="loading-content">
-                    <div className="loading-spinner">🔐</div>
-                    <h2 className="display-font">Connecting...</h2>
-                    <p style={{ color: 'var(--gray-500)', fontSize: '0.9rem' }}>
-                        Checking authentication
-                    </p>
-                </div>
+            <div style={{
+                minHeight: '100vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: '#f8f9fa',
+                flexDirection: 'column',
+                gap: '16px'
+            }}>
+                <div className="auth-spinner" style={{
+                    width: '48px',
+                    height: '48px',
+                    border: '4px solid #e5e7eb',
+                    borderTop: '4px solid #7C3AED',
+                    borderRadius: '50%',
+                    animation: 'authSpin 0.8s linear infinite'
+                }} />
+                <p style={{ color: '#6b7280', fontSize: '14px', fontFamily: 'system-ui, sans-serif' }}>
+                    Loading...
+                </p>
+                <style>{`
+                    @keyframes authSpin {
+                        to { transform: rotate(360deg); }
+                    }
+                    @media (prefers-color-scheme: dark) {
+                        .auth-spinner { border-color: #374151 !important; border-top-color: #8B5CF6 !important; }
+                    }
+                `}</style>
             </div>
         );
     }
@@ -456,6 +646,11 @@ function AppContent() {
                 onOpenPhotoEnhance={() => setShowPhotoEnhance(true)}
             />
 
+            {/* 5 Main Menus - Accordion Navigation */}
+            {sidebarOpen && (
+                <MainMenu onNavigate={handleMenuNavigate} />
+            )}
+
             {/* Main Content */}
             <main className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
                 {/* Cloud Sync Status Toast */}
@@ -537,58 +732,71 @@ function AppContent() {
                     </div>
                 )}
 
-                {/* Data Entry Form */}
-                <div className={`form-container ${isFormMaximized ? 'maximized' : ''}`}>
-                    {selectedStandard && (
+                {/* Menu Content - Shows when a menu item is selected */}
+                {showMenuContent && menuContentType ? (
+                    <div className="menu-content-area">
                         <button
-                            className="form-maximize-btn btn btn-icon btn-ghost"
-                            onClick={() => setIsFormMaximized(!isFormMaximized)}
-                            title={isFormMaximized ? 'Minimize' : 'Maximize'}
+                            className="btn btn-ghost menu-back-btn"
+                            onClick={() => { setShowMenuContent(false); setMenuContentType(null); }}
                         >
-                            {isFormMaximized ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                            ← Back to Main
                         </button>
-                    )}
-                    {selectedStandard ? (
-                        <StepWizard
-                            key={editingStudent?.id || 'new'}
-                            onSave={handleAddStudent}
-                            initialData={editingStudent || {}}
-                            selectedStandard={selectedStandard}
-                            customFields={fields}
-                            onCancel={editingStudent ? () => setEditingStudent(null) : null}
-                        />
-                    ) : (
-                        <div className="no-standard-selected fluffy-card">
-                            <div className="empty-state">
-                                <img src="/edunorm-logo.png" alt="EduNorm" className="welcome-logo" />
-                                <h2 className="display-font">Welcome to EduNorm!</h2>
-                                <p>Please select or create a Standard/Class from the sidebar to start entering student data.</p>
-                                <div className="empty-steps">
-                                    <div className="step-item">
-                                        <span className="step-num">1</span>
-                                        <span>Upload School Logo</span>
-                                    </div>
-                                    <div className="step-item">
-                                        <span className="step-num">2</span>
-                                        <span>Enter School Name</span>
-                                    </div>
-                                    <div className="step-item">
-                                        <span className="step-num">3</span>
-                                        <span>Add Teacher Name</span>
-                                    </div>
-                                    <div className="step-item">
-                                        <span className="step-num">4</span>
-                                        <span>Select or Create Standard</span>
-                                    </div>
-                                    <div className="step-item">
-                                        <span className="step-num">5</span>
-                                        <span>Start Adding Students!</span>
+                        {renderMenuContent()}
+                    </div>
+                ) : (
+                    /* Data Entry Form */
+                    <div className={`form-container ${isFormMaximized ? 'maximized' : ''}`}>
+                        {selectedStandard && (
+                            <button
+                                className="form-maximize-btn btn btn-icon btn-ghost"
+                                onClick={() => setIsFormMaximized(!isFormMaximized)}
+                                title={isFormMaximized ? 'Minimize' : 'Maximize'}
+                            >
+                                {isFormMaximized ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+                            </button>
+                        )}
+                        {selectedStandard ? (
+                            <StepWizard
+                                key={editingStudent?.id || 'new'}
+                                onSave={handleAddStudent}
+                                initialData={editingStudent || {}}
+                                selectedStandard={selectedStandard}
+                                customFields={fields}
+                                onCancel={editingStudent ? () => setEditingStudent(null) : null}
+                            />
+                        ) : (
+                            <div className="no-standard-selected fluffy-card">
+                                <div className="empty-state">
+                                    <img src="/edunorm-logo.png" alt="EduNorm" className="welcome-logo" />
+                                    <h2 className="display-font">Welcome to EduNorm!</h2>
+                                    <p>Please select or create a Standard/Class from the sidebar to start entering student data.</p>
+                                    <div className="empty-steps">
+                                        <div className="step-item">
+                                            <span className="step-num">1</span>
+                                            <span>Upload School Logo</span>
+                                        </div>
+                                        <div className="step-item">
+                                            <span className="step-num">2</span>
+                                            <span>Enter School Name</span>
+                                        </div>
+                                        <div className="step-item">
+                                            <span className="step-num">3</span>
+                                            <span>Add Teacher Name</span>
+                                        </div>
+                                        <div className="step-item">
+                                            <span className="step-num">4</span>
+                                            <span>Select or Create Standard</span>
+                                        </div>
+                                        <div className="step-item">
+                                            <span className="step-num">5</span>
+                                            <span>Start Adding Students!</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
             </main>
 
             {/* Profile Viewer Modal */}

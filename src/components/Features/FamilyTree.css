@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    /* blur removed */
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -56,7 +56,7 @@
     cursor: pointer;
     color: white;
     display: flex;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .family-tree-content {
@@ -114,7 +114,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    transition: all 0.3s;
+    transition: all 0.05s ease;
 }
 
 .member-card:hover {
@@ -175,7 +175,7 @@
     cursor: pointer;
     color: #ef4444;
     opacity: 0;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .member-card:hover .remove-btn {
@@ -338,7 +338,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .add-member-btn:hover {

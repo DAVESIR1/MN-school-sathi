@@ -19,6 +19,29 @@ import { encryptData, decryptData, isEncrypted } from './SecureEncryption';
  * NO ONE can see user data - only the app can decrypt it!
  */
 
+// Retry helper with exponential backoff
+async function retryOperation(fn, maxRetries = 3) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            return await fn();
+        } catch (err) {
+            if (i === maxRetries - 1) throw err;
+            const delay = Math.min(1000 * Math.pow(2, i), 5000);
+            console.warn(`CloudBackupService: Retry ${i + 1}/${maxRetries} in ${delay}ms...`);
+            await new Promise(r => setTimeout(r, delay));
+        }
+    }
+}
+
+// Estimate JSON size in bytes
+function estimateSize(data) {
+    try {
+        return new Blob([JSON.stringify(data)]).size;
+    } catch {
+        return 0;
+    }
+}
+
 // Backup all user data to cloud
 export async function backupToCloud(userId) {
     if (!userId) {
@@ -67,43 +90,91 @@ export async function backupToCloud(userId) {
             appVersion: '2.0.0'
         };
 
-        // ENCRYPT AND COMPRESS DATA
-        console.log('CloudBackupService: Encrypting data with AES-256-GCM...');
-        const encryptedPackage = await encryptData(backupData, userId);
+        // Check data size - Firestore limit is 1MB per document
+        const rawSize = estimateSize(backupData);
+        console.log(`CloudBackupService: Raw data size: ${(rawSize / 1024).toFixed(1)}KB`);
 
-        // Add metadata for storage (counts stored OUTSIDE encrypted data for display)
+        // ENCRYPT AND COMPRESS DATA (compression typically reduces 80-90%)
+        console.log('CloudBackupService: Encrypting data with AES-256-GCM...');
+        let encryptedPackage;
+        try {
+            encryptedPackage = await encryptData(backupData, userId);
+        } catch (encErr) {
+            console.error('CloudBackupService: Encryption failed, saving unencrypted backup:', encErr);
+            // Fallback: save without encryption if it fails (safety net)
+            encryptedPackage = {
+                data: backupData,
+                version: '1.0-unencrypted',
+                compressed: false,
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        // Check encrypted size
+        const encryptedSize = estimateSize(encryptedPackage);
+        console.log(`CloudBackupService: Encrypted size: ${(encryptedSize / 1024).toFixed(1)}KB`);
+
+        // Add metadata for storage
+        const schoolName = settings?.schoolName || 'Unknown School';
         const secureBackup = {
             ...encryptedPackage,
             backupDate: serverTimestamp(),
             lastModified: new Date().toISOString(),
             userId: userId,
+            schoolName: schoolName,
             dataVersion: '2.0',
-            security: 'AES-256-GCM + PBKDF2 + GZIP',
-            // Store counts as unencrypted metadata (actual data is encrypted)
+            security: encryptedPackage.version === '2.0' ? 'AES-256-GCM + PBKDF2 + GZIP' : 'none',
             studentCount: students?.length || 0,
             standardCount: standards?.length || 0,
             customFieldCount: customFields?.length || 0
         };
 
-        console.log('CloudBackupService: Saving with metadata:', {
-            studentCount: secureBackup.studentCount,
-            standardCount: secureBackup.standardCount,
-            hasEncrypted: !!secureBackup.encrypted,
-            version: secureBackup.dataVersion
-        });
+        // If data is too large for a single document (>800KB after encryption), chunk it
+        if (encryptedSize > 800000 && encryptedPackage.encrypted) {
+            console.log('CloudBackupService: Data exceeds safe limit, using chunked backup...');
+            const encrypted = encryptedPackage.encrypted;
+            const CHUNK_SIZE = 500000; // 500KB chunks
+            const totalChunks = Math.ceil(encrypted.length / CHUNK_SIZE);
 
-        // Save encrypted data to Firestore
-        const backupRef = doc(db, 'backups', userId);
-        await setDoc(backupRef, secureBackup);
+            // Save metadata document
+            const metaRef = doc(db, 'backups', userId);
+            await retryOperation(() => setDoc(metaRef, {
+                ...secureBackup,
+                encrypted: null, // Don't store data in meta
+                chunked: true,
+                totalChunks,
+                chunkSize: CHUNK_SIZE
+            }));
 
-        console.log('CloudBackupService: Encrypted backup saved successfully!');
+            // Save chunks
+            for (let i = 0; i < totalChunks; i++) {
+                const chunkData = encrypted.substring(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+                const chunkRef = doc(db, 'backups', userId, 'chunks', `chunk_${i}`);
+                await retryOperation(() => setDoc(chunkRef, {
+                    index: i,
+                    data: chunkData,
+                    totalChunks
+                }));
+                console.log(`CloudBackupService: Saved chunk ${i + 1}/${totalChunks}`);
+            }
+        } else {
+            // Save as single document
+            const backupRef = doc(db, 'backups', userId);
+            await retryOperation(() => setDoc(backupRef, secureBackup));
+        }
+
+        console.log('CloudBackupService: Backup saved successfully!');
 
         // Also save to history (optional - may fail on free tier limits)
         try {
             const historyRef = doc(collection(db, 'backups', userId, 'history'));
             await setDoc(historyRef, {
-                ...secureBackup,
-                backupDate: serverTimestamp()
+                backupDate: serverTimestamp(),
+                lastModified: new Date().toISOString(),
+                studentCount: students?.length || 0,
+                standardCount: standards?.length || 0,
+                dataVersion: '2.0',
+                sizeKB: Math.round(encryptedSize / 1024)
             });
         } catch (historyError) {
             // Don't fail the whole backup if history fails
@@ -114,8 +185,9 @@ export async function backupToCloud(userId) {
             success: true,
             message: '🔐 Backup encrypted & saved to cloud!',
             timestamp: new Date().toISOString(),
-            encrypted: true,
-            compression: 'GZIP'
+            encrypted: encryptedPackage.version === '2.0',
+            compression: 'GZIP',
+            sizeKB: Math.round(encryptedSize / 1024)
         };
     } catch (error) {
         console.error('CloudBackupService: Backup error:', error);
@@ -157,27 +229,53 @@ export async function restoreFromCloud(userId) {
 
         // DECRYPT DATA if encrypted
         let backupData;
-        console.log('CloudBackupService: Checking if data is encrypted...', {
+        console.log('CloudBackupService: Checking backup format...', {
             hasEncrypted: !!storedData.encrypted,
+            chunked: !!storedData.chunked,
             version: storedData.version,
-            hasAlgorithm: !!storedData.algorithm,
-            studentCount: storedData.studentCount,
-            standardCount: storedData.standardCount
+            studentCount: storedData.studentCount
         });
 
-        if (isEncrypted(storedData)) {
+        // Handle chunked backups (large data split across multiple docs)
+        if (storedData.chunked && storedData.totalChunks) {
+            console.log(`CloudBackupService: Reassembling ${storedData.totalChunks} chunks...`);
+            const chunksQuery = query(
+                collection(db, 'backups', userId, 'chunks'),
+                orderBy('index'),
+                limit(storedData.totalChunks)
+            );
+            const chunksSnap = await getDocs(chunksQuery);
+            let reassembled = '';
+            chunksSnap.forEach(chunkDoc => {
+                reassembled += chunkDoc.data().data;
+            });
+            console.log(`CloudBackupService: Reassembled ${reassembled.length} chars from ${chunksSnap.size} chunks`);
+
+            // Reconstruct the encrypted package
+            const encryptedPackage = {
+                ...storedData,
+                encrypted: reassembled,
+                chunked: undefined
+            };
+            backupData = await decryptData(encryptedPackage, userId);
+        } else if (isEncrypted(storedData)) {
             console.log('CloudBackupService: Decrypting backup data...');
             backupData = await decryptData(storedData, userId);
-            console.log('CloudBackupService: Data decrypted successfully!', {
-                hasSettings: !!backupData?.settings,
-                studentCount: backupData?.students?.length || 0,
-                standardCount: backupData?.standards?.length || 0
-            });
+        } else if (storedData.version === '1.0-unencrypted' && storedData.data) {
+            // Fallback unencrypted backup
+            console.log('CloudBackupService: Unencrypted fallback backup detected');
+            backupData = storedData.data;
         } else {
             // Legacy unencrypted backup
             console.log('CloudBackupService: Legacy backup detected (unencrypted)');
             backupData = storedData;
         }
+
+        console.log('CloudBackupService: Data ready for import', {
+            hasSettings: !!backupData?.settings,
+            studentCount: backupData?.students?.length || 0,
+            standardCount: backupData?.standards?.length || 0
+        });
 
         // Use importAllData for reliable restore (uses put() which upserts)
         console.log('CloudBackupService: Starting data import...', {

@@ -3,7 +3,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    /* blur removed */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -19,14 +19,10 @@
     max-width: 700px;
     max-height: 90vh;
     overflow-y: auto;
-    animation: slideUp 0.3s ease-out;
+    animation: none;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+/* keyframe removed */
 
     to {
         opacity: 1;

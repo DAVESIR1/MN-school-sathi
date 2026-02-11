@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(8px);
+    /* blur removed */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -63,7 +63,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .cert-gen-header .close-btn:hover {
@@ -107,7 +107,7 @@
     font-size: 0.8rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
     color: var(--text-muted, #666);
 }
 
@@ -144,7 +144,7 @@
     border-radius: 12px;
     background: var(--card-bg, white);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .template-card:hover {
@@ -197,7 +197,7 @@
     border: 1px solid var(--border-color, #e0e0e0);
     border-radius: 10px;
     font-size: 0.9rem;
-    transition: all 0.2s;
+    transition: all 0.05s;
     box-sizing: border-box;
 }
 
@@ -228,7 +228,7 @@
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
     margin-top: 10px;
 }
 

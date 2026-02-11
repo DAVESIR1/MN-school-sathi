@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, X, FileSpreadsheet, Download, ChevronUp, ChevronDown, Eye, Maximize2, Minimize2, Edit3 } from 'lucide-react';
+import { Search, X, FileSpreadsheet, Download, ChevronUp, ChevronDown, Eye, Maximize2, Minimize2, Edit3, Share2 } from 'lucide-react';
 import LedgerSearch from './LedgerSearch';
+import UniversalExport from '../Common/UniversalExport';
 import './GeneralRegister.css';
 
 export default function GeneralRegister({
@@ -17,6 +18,7 @@ export default function GeneralRegister({
     const [sortDir, setSortDir] = useState('asc');
     const [expandedRow, setExpandedRow] = useState(null);
     const [isMaximized, setIsMaximized] = useState(false);
+    const [showExportPanel, setShowExportPanel] = useState(false);
 
     if (!isOpen) return null;
 
@@ -124,11 +126,27 @@ export default function GeneralRegister({
                 {/* Search and Actions */}
                 <div className="ledger-actions">
                     <LedgerSearch onSearch={onSearch} query={searchQuery} />
-                    <button className="btn btn-secondary" onClick={handleExportCSV}>
-                        <Download size={18} />
-                        Export CSV
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button className="btn btn-secondary" onClick={handleExportCSV}>
+                            <Download size={18} />
+                            Export CSV
+                        </button>
+                        <button className="btn btn-outline" onClick={() => setShowExportPanel(!showExportPanel)}>
+                            <Share2 size={18} />
+                            Export & Share
+                        </button>
+                    </div>
                 </div>
+
+                {/* Advanced Export Panel */}
+                {showExportPanel && (
+                    <UniversalExport
+                        data={sortedData}
+                        title="General Register"
+                        columns={['ledgerNo', 'grNo', 'name', 'standard', 'rollNo', 'contactNumber', 'aadharNumber', 'motherName']}
+                        onClose={() => setShowExportPanel(false)}
+                    />
+                )}
 
                 {/* Table */}
                 <div className="ledger-table-wrapper">

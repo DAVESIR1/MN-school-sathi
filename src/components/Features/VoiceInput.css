@@ -2,7 +2,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    /* blur removed */
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -53,7 +53,7 @@
     cursor: pointer;
     color: white;
     display: flex;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .voice-input-content {
@@ -117,7 +117,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
+    transition: all 0.05s ease;
     box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
 }
 
@@ -136,18 +136,14 @@
     height: 100%;
     border-radius: 50%;
     border: 3px solid currentColor;
-    animation: pulse 1.5s ease-out infinite;
+    animation: none;
 }
 
 .pulse-ring.delay {
     animation-delay: 0.5s;
 }
 
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-        opacity: 1;
-    }
+/* keyframe removed */
 
     100% {
         transform: scale(1.6);
@@ -192,13 +188,10 @@
 }
 
 .transcript-box .spin {
-    animation: spin 1s linear infinite;
+    animation: none;
 }
 
-@keyframes spin {
-    from {
-        transform: rotate(0deg);
-    }
+/* keyframe removed */
 
     to {
         transform: rotate(360deg);
@@ -238,7 +231,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .voice-actions .apply-btn:disabled {
@@ -254,7 +247,7 @@
     border-radius: 12px;
     font-size: 0.95rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.05s;
 }
 
 .voice-input-footer {
