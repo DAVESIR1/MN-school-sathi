@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Camera, Upload, FileText, X, Loader, Check, AlertCircle, Scan } from 'lucide-react';
-import Tesseract from 'tesseract.js';
+// import Tesseract from 'tesseract.js'; // Removed static import
 import './DocumentScanner.css';
 
 export default function DocumentScanner({ isOpen, onClose, onDataExtracted }) {
@@ -132,6 +132,7 @@ export default function DocumentScanner({ isOpen, onClose, onDataExtracted }) {
         setError(null);
 
         try {
+            const Tesseract = (await import('tesseract.js')).default;
             const result = await Tesseract.recognize(image, 'eng+hin', {
                 logger: (m) => {
                     if (m.status === 'recognizing text') {

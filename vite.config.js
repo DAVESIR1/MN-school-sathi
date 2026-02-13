@@ -6,5 +6,17 @@ export default defineConfig({
     server: {
         port: 5173,
         open: true
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+                    'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/firestore', 'firebase/storage'],
+                    'vendor-utils': ['jspdf', 'html2canvas', 'xlsx', 'idb']
+                }
+            }
+        },
+        chunkSizeWarningLimit: 1000
     }
 })
