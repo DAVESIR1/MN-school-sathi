@@ -308,24 +308,29 @@ async function publishToPublicDirectory(students, settings, userId) {
     for (const chunk of chunks) {
         const batch = writeBatch(db);
         chunk.forEach(student => {
-            if (!student.id) return; // Skip invalid
-            const studentRef = firestoreDoc(db, `schools/${cleanSchoolId}/students`, String(student.id));
+            // CRITICAL FIX: Use grNo as doc ID to match MigrationService
+            const grNoStr = String(student.grNo || '').trim();
+            if (!grNoStr) return; // Skip students without GR number
+            const docId = grNoStr.replace(/\//g, '-');
+            const studentRef = firestoreDoc(db, `schools/${cleanSchoolId}/students`, docId);
 
-            // Only sync searchable/verifiable fields to public directory
-            // We strip sensitive data not needed for verification if we wanted to be strict,
-            // but for verifyStudent() to work flexibly, we send the core object.
-            // Let's send a sanitized version.
+            // Normalize aadharNo/aadharNumber
+            const normalizedAadhar = String(student.aadharNo || student.aadharNumber || '');
+
             const publicData = {
-                id: String(student.id),
-                grNo: String(student.grNo || ''),
-                name: student.name || '',
+                id: String(student.id || ''),
+                grNo: grNoStr,
+                name: student.name || student.nameEnglish || '',
                 standard: student.standard || '',
                 section: student.division || student.section || '',
-                aadharNo: String(student.aadharNo || ''),
+                aadharNo: normalizedAadhar,
+                aadharNumber: normalizedAadhar, // Sync both field names
                 govId: String(student.govId || ''),
+                sssmId: String(student.sssmId || ''), // Bug 2 fix: was missing
                 email: student.email || '',
                 dob: student.dob || '',
-                mobile: String(student.contactNumber || student.mobile || ''), // Critical: Map contactNumber
+                mobile: String(student.contactNumber || student.mobile || ''),
+                contactNumber: String(student.contactNumber || student.mobile || ''), // Sync both field names
                 gender: student.gender || '',
                 lastUpdated: serverTimestamp()
             };
@@ -432,22 +437,33 @@ async function restoreFromCloudData(storedData, userId) {
         }
     }
 
-    // Restore students
+    // Restore students — Bug 3 fix: use importAllData with Smart Merge
+    // instead of addStudent() which silently fails on duplicate GR numbers
     if (backupData.students?.length > 0) {
-        console.log(`CloudSync: Restoring ${backupData.students.length} students...`);
-        let restoredCount = 0;
-        for (const student of backupData.students) {
-            try {
-                await localDb.addStudent(student);
-                restoredCount++;
-            } catch (e) {
-                // console.log('CloudSync: Student already exists:', student.grNo);
-                // Try update instead? For restore, we usually overwrite or skip.
-                // Let's assume skip if exists is safe, but maybe we should update.
-                // For now, just log.
+        console.log(`CloudSync: Restoring ${backupData.students.length} students via Smart Merge...`);
+        try {
+            await localDb.importAllData({ students: backupData.students });
+            console.log(`CloudSync: Students restored via Smart Merge successfully.`);
+        } catch (e) {
+            console.error('CloudSync: Student restore via Smart Merge failed:', e);
+            // Fallback: try one-by-one with update
+            let restoredCount = 0;
+            for (const student of backupData.students) {
+                try {
+                    // Try to find existing by GR
+                    const existing = await localDb.getStudentByGrNo(student.grNo);
+                    if (existing) {
+                        await localDb.updateStudent(existing.id, student);
+                    } else {
+                        await localDb.addStudent(student);
+                    }
+                    restoredCount++;
+                } catch (innerErr) {
+                    console.warn('CloudSync: Skip student:', student.grNo, innerErr.message);
+                }
             }
+            console.log(`CloudSync: Fallback restored ${restoredCount} students.`);
         }
-        console.log(`CloudSync: Successfully restored ${restoredCount} students locally.`);
     } else {
         console.warn('CloudSync: No students found in backup data.');
     }

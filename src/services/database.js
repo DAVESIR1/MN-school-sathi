@@ -570,15 +570,17 @@ export async function verifyStudent(grNo, govId, schoolCodeArg) {
     if (!student) return { success: false, error: `Student with GR No "${grNo}" not found.` };
 
     // 4. FUZZY IDENTITY VERIFICATION
+    // Handles all field name variants across local DB and Firestore
     const inputVal = cleanStr(govId);
 
-    const storedAadhar = cleanStr(student.aadharNo || student.aadharNumber);
+    const storedAadhar = cleanStr(student.aadharNo || student.aadharNumber || student.aadhar);
     const storedGovId = cleanStr(student.govId);
-    const storedSssm = cleanStr(student.sssmId);
+    const storedSssm = cleanStr(student.sssmId || student.sssm_id);
     const storedEmail = cleanStr(student.email);
-    const storedMobile = cleanStr(student.mobile || student.contactNumber);
+    const storedMobile = cleanStr(student.mobile || student.contactNumber || student.phone);
+    const storedName = student.name || student.nameEnglish || '';
 
-    console.log(`Smart Verify: GR=${grNo} | Input="${inputVal}" | Aadhar=${storedAadhar === inputVal}, Mobile=${storedMobile === inputVal}`);
+    console.log(`Smart Verify: GR=${grNo} | Name="${storedName}" | Input="${inputVal}" | Aadhar=${storedAadhar === inputVal}, Mobile=${storedMobile === inputVal}, GovId=${storedGovId === inputVal}, SSSM=${storedSssm === inputVal}, Email=${storedEmail === inputVal}`);
 
     if (
         (storedAadhar && storedAadhar === inputVal) ||

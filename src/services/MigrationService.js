@@ -158,16 +158,22 @@ async function syncStudents(schoolId, students) {
 
             const studentRef = doc(studentsCollection, docId);
 
+            // Normalize aadhar field
+            const normalizedAadhar = String(student.aadharNo || student.aadharNumber || '');
+
             const cleanStudent = {
                 id: String(student.id || ''),
                 grNo: String(student.grNo || ''),
-                name: student.name || 'Unknown',
+                name: student.name || student.nameEnglish || 'Unknown',
                 standard: student.standard || '',
                 section: student.division || student.section || '',
 
-                aadharNo: String(student.aadharNo || ''),
+                aadharNo: normalizedAadhar,
+                aadharNumber: normalizedAadhar, // Sync both field names
                 govId: String(student.govId || ''),
-                mobile: String(student.contactNumber || student.mobile || ''), // Critical: Map contactNumber
+                sssmId: String(student.sssmId || ''), // Bug 4 fix: was missing
+                mobile: String(student.contactNumber || student.mobile || ''),
+                contactNumber: String(student.contactNumber || student.mobile || ''), // Sync both names
                 email: String(student.email || ''),
                 dob: student.dob || '',
 
