@@ -10,6 +10,12 @@
     position: relative;
     line-height: 1;
     user-select: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    z-index: 200;
+    /* Ensure above decoration lines */
+    margin-left: 4px;
+    /* Slight offset if needed */
 }
 
 /* Size Variants */

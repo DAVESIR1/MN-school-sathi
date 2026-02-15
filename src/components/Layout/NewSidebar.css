@@ -271,11 +271,13 @@
 @media (max-width: 768px) {
     .new-sidebar.collapsed {
         transform: translateX(-100%);
-        width: 280px;
+        width: 80vw;
+        max-width: 280px;
     }
 
     .new-sidebar.open {
-        width: 280px;
+        width: 80vw;
+        max-width: 280px;
         transform: translateX(0);
     }
 }

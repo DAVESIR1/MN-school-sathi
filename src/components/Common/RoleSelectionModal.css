@@ -18,8 +18,8 @@
 .role-modal-content {
     background: var(--bg-card, #ffffff);
     border-radius: 24px;
-    padding: 40px;
-    width: 100%;
+    padding: 24px;
+    width: 90%;
     max-width: 800px;
     text-align: center;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -187,5 +187,15 @@
 @media (max-width: 768px) {
     .role-options-grid {
         grid-template-columns: 1fr;
+    }
+
+    .role-modal-content {
+        padding: 24px 16px;
+        margin: 16px;
+        width: 95%;
+    }
+
+    .role-modal-content h2 {
+        font-size: 1.5rem;
     }
 }

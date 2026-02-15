@@ -59,6 +59,12 @@ service cloud.firestore {
       allow read: if true; // Public settings like "Maintenance Mode"
       allow write: if isAdmin();
     }
+
+    // 6. SCHOOL PROFILE (Fix for "Missing Permissions" error)
+    // Allow authenticated users (Admins/HOIs) to manage their school profile
+    match /schoolProfile/{document=**} {
+      allow read, write: if isAuth(); 
+    }
     
     // Default Deny
     match /{document=**} {
