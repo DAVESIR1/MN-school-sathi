@@ -281,6 +281,8 @@ function AppContent() {
         await updateSetting('selectedStandard', selectedStandard);
         // Trigger real-time backup
         RealTimeBackup.onDataChanged('settings');
+        // Redundant safe backup to ensure settings like School Name/Logo are synced to R2/Cloud
+        MandatoryBackupService.triggerBackupOnChange();
         alert('Settings saved successfully!');
     }, [schoolName, schoolLogo, schoolContact, schoolEmail, teacherName, selectedStandard, updateSetting, user?.uid]);
 
