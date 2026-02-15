@@ -320,6 +320,23 @@
     width: 100%;
 }
 
+@media (max-width: 768px) {
+    .sidebar-header-left {
+        justify-content: center;
+        position: relative;
+    }
+
+    .sidebar-brand {
+        margin: 0 auto;
+    }
+
+    /* Move toggle button to absolute left */
+    .sidebar-pin-btn {
+        position: absolute;
+        left: 0;
+    }
+}
+
 /* Pin/Toggle Button */
 .sidebar-pin-btn {
     width: 42px;
@@ -368,11 +385,16 @@
     transform: translateX(-10px);
     transition: all 0.3s ease;
     transition-delay: 0.1s;
+    /* FIX: Hide completely when collapsed to prevent overlap */
+    visibility: hidden;
+    width: 0;
 }
 
 .brand-text-wrapper.visible {
     opacity: 1;
     transform: translateX(0);
+    visibility: visible;
+    width: auto;
 }
 
 /* ===== CUSTOM BRAND LOGO COMPONENT ===== */

@@ -15,6 +15,7 @@
  */
 
 import pako from 'pako';
+import { safeJsonStringify } from '../utils/SafeJson';
 
 // Encryption configuration
 const ENCRYPTION_CONFIG = {
@@ -63,7 +64,8 @@ async function deriveKey(userId, salt) {
  * Typically reduces JSON data size by 80-90%
  */
 function compressData(data) {
-    const jsonString = JSON.stringify(data);
+    // Use safeJsonStringify to prevent crashes on circular references
+    const jsonString = safeJsonStringify(data);
     const originalSize = new Blob([jsonString]).size;
 
     // Compress with maximum compression level

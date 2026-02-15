@@ -54,19 +54,10 @@ export function createLocalBackup(data) {
         const jsonString = JSON.stringify(backup);
 
         // Check if data fits in localStorage (usually 5-10MB limit)
+        // Check if data fits in localStorage (usually 5-10MB limit)
         if (jsonString.length > 4 * 1024 * 1024) {
-            console.warn('LocalBackupService: Data too large for localStorage, using compressed backup');
-            // Store only essential data
-            const essentialBackup = {
-                version: CURRENT_APP_VERSION,
-                timestamp: new Date().toISOString(),
-                data: {
-                    students: data.students || [],
-                    standards: data.standards || [],
-                    settings: data.settings || {}
-                }
-            };
-            localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(essentialBackup));
+            console.warn('LocalBackupService: Data too large for localStorage (Skipping Local Backup)');
+            return false;
         } else {
             localStorage.setItem(LOCAL_BACKUP_KEY, jsonString);
         }

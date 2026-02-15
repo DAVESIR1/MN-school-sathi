@@ -91,6 +91,16 @@ export async function getAllSettings() {
     return db.getAll('settings');
 }
 
+// Sync Timestamp Management
+export async function getLastSyncTime() {
+    const val = await getSetting('last_sync_timestamp');
+    return val ? parseInt(val, 10) : 0;
+}
+
+export async function setLastSyncTime(timestamp) {
+    return setSetting('last_sync_timestamp', timestamp.toString());
+}
+
 // Student operations
 export async function addStudent(studentData) {
     const db = await initDB();
@@ -455,7 +465,7 @@ export const getAllLedgerEntries = getLedger;
 
 // Verification Utilities for Login
 // Verification Utilities for Login
-export async function verifyStudent(grNo, govId) {
+export async function verifyStudent(grNo, govId, schoolCodeArg) {
     const db = await initDB();
     // 1. Try to find by GR No (Local Try both String and Number formats)
     const index = db.transaction('students').store.index('grNo');
@@ -478,30 +488,65 @@ export async function verifyStudent(grNo, govId) {
 
             if (isFirebaseConfigured) {
                 const firestore = getFirestore();
-                // We need the school ID to query students. 
-                // However, at this point, we might only have the School Code from context.
-                // Constraint: We can't easily query ALL schools for a GR No.
-                // Solution: We must rely on the School Profile being actively set in the context 
-                // OR passed down.
-                // Assuming the school is set locally (which is the prerequisite for this function anyway).
-                // OR passed down.
-                // Assuming the school is set locally (which is the prerequisite for this function anyway).
-                const schoolProfile = await getSetting('school_profile');
 
-                // CRITICAL FIX: Use schoolCode/udise if ID is missing (Manual Entry case)
-                const schoolId = schoolProfile?.id || schoolProfile?.schoolCode || schoolProfile?.udiseNumber || schoolProfile?.indexNumber;
+                // PRIORITIZE: Passed School Code -> Local Profile ID
+                const searchCode = String(schoolCodeArg || schoolProfile?.udiseNumber || schoolProfile?.schoolCode || schoolProfile?.indexNumber || '').trim();
 
-                if (schoolId) {
-                    const cleanSchoolId = String(schoolId).trim().replace(/[^a-zA-Z0-9]/g, '');
-                    const studentsRef = collection(firestore, `schools/${cleanSchoolId}/students`);
-                    // Try querying by GR No (string match usually)
-                    const q = query(studentsRef, where("grNo", "==", String(grNo)));
-                    const querySnapshot = await getDocs(q);
+                if (searchCode) {
+                    console.log('Verifying with School Code:', searchCode);
 
-                    if (!querySnapshot.empty) {
-                        const doc = querySnapshot.docs[0];
-                        student = { ...doc.data(), id: doc.id };
-                        console.log('Student found in Live Firestore:', student.name);
+                    // 1. Resolve School UID from the Code (UDISE/Index/etc)
+                    // We need to find which "school" document has this code
+                    let targetSchoolUid = null;
+
+                    // First, if the user happens to have the UID locally (rare for new users), use it.
+                    if (schoolProfile?.id && schoolProfile?.id.length > 20) {
+                        targetSchoolUid = schoolProfile.id;
+                    }
+
+                    if (!targetSchoolUid) {
+                        // Query 'schools' collection to find the doc with this udise/code
+                        const schoolsRef = collection(firestore, 'schools');
+
+                        // Try UDISE first
+                        let q = query(schoolsRef, where('udiseNumber', '==', searchCode));
+                        let snap = await getDocs(q);
+
+                        console.log(`Database: UDISE Query Result Empty? ${snap.empty}`);
+
+                        if (snap.empty) {
+                            // Try Index Number
+                            q = query(schoolsRef, where('indexNumber', '==', searchCode));
+                            snap = await getDocs(q);
+                        }
+
+                        // If still empty, maybe they entered the UID directly? (Unlikely but valid)
+                        if (snap.empty) {
+                            const directDoc = await import('firebase/firestore').then(mod => mod.getDoc(mod.doc(firestore, 'schools', searchCode)));
+                            if (directDoc.exists()) {
+                                targetSchoolUid = directDoc.id;
+                            }
+                        } else {
+                            targetSchoolUid = snap.docs[0].id;
+                        }
+                    }
+
+                    if (targetSchoolUid) {
+                        console.log('Found School UID:', targetSchoolUid);
+                        const studentsRef = collection(firestore, `schools/${targetSchoolUid}/students`);
+                        // Try querying by GR No (string match usually)
+                        const q = query(studentsRef, where("grNo", "==", String(grNo)));
+                        const querySnapshot = await getDocs(q);
+
+                        if (!querySnapshot.empty) {
+                            const doc = querySnapshot.docs[0];
+                            student = { ...doc.data(), id: doc.id };
+                            console.log('Student found in Live Firestore:', student.name);
+                        } else {
+                            console.log('School found, but Student GR not found.');
+                        }
+                    } else {
+                        console.warn('No registered school found with code:', searchCode);
                     }
                 }
             }
@@ -521,7 +566,7 @@ export async function verifyStudent(grNo, govId) {
     const storedGovId = student.govId ? String(student.govId).trim() : '';
     const storedSssm = student.sssmId ? String(student.sssmId).trim() : '';
     const storedEmail = student.email ? String(student.email).trim().toLowerCase() : '';
-    const storedMobile = student.mobile ? String(student.mobile).trim() : '';
+    const storedMobile = student.mobile ? String(student.mobile).trim() : (student.contactNumber ? String(student.contactNumber).trim() : '');
 
     const debugMsg = `Checking Student GR: ${grNo} | Input: "${inputVal}" | Stored: Aadhar=${storedAadhar}, GovID=${storedGovId}, Email=${storedEmail}, Mobile=${storedMobile}`;
     console.log(debugMsg);

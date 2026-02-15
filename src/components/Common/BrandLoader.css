@@ -16,117 +16,30 @@
     color: white;
 }
 
-.brand-loader-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-.logo-wrapper {
-    transform: scale(1.5);
-    margin-bottom: 1rem;
-}
-
-.pulse-animation {
-    animation: pulse 2s infinite ease-in-out;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1.5);
-        opacity: 1;
-    }
-
-    50% {
-        transform: scale(1.6);
-        opacity: 0.8;
-    }
-
-    100% {
-        transform: scale(1.5);
-        opacity: 1;
-    }
-}
-
+/* Smooth Text Reveal */
 .brand-text-reveal {
     font-family: 'Baloo 2', cursive;
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 800;
     background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     opacity: 0;
-    animation: fadeInUp 0.8s ease-out forwards 0.2s;
+    animation: smoothFadeIn 1.2s ease-out forwards;
     letter-spacing: -1px;
 }
 
-.loading-message {
-    color: #64748b;
-    font-family: 'Quicksand', sans-serif;
-    font-weight: 500;
-    font-size: 1.1rem;
-    opacity: 0;
-    animation: fadeInUp 0.8s ease-out forwards 0.5s;
-}
-
-.loader-bar {
-    width: 200px;
-    height: 4px;
-    background: #e2e8f0;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-top: 1rem;
-    opacity: 0;
-    animation: fadeIn 0.5s ease-out forwards 0.8s;
-}
-
-[data-theme='neon'] .loader-bar {
-    background: #1e293b;
-}
-
-.loader-progress {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, #6366f1, #a855f7);
-    border-radius: 4px;
-    transform: translateX(-100%);
-    animation: progress 1.5s ease-in-out infinite;
-}
-
-@keyframes progress {
+@keyframes smoothFadeIn {
     0% {
-        transform: translateX(-100%);
-    }
-
-    50% {
-        transform: translateX(0%);
+        opacity: 0;
+        transform: scale(0.95);
+        filter: blur(4px);
     }
 
     100% {
-        transform: translateX(100%);
-    }
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
         opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
     }
 }

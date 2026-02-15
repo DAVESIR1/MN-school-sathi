@@ -60,29 +60,11 @@ export function AuthProvider({ children }) {
                 // Fetch extra profile data
                 let userProfile = {};
                 const localProfile = localStorage.getItem(`user_profile_${firebaseUser.uid}`);
-
                 if (localProfile) {
                     userProfile = JSON.parse(localProfile);
                 }
-
-                // Robustness: If local profile is missing or incomplete, fetch from Firestore
-                // This ensures roles persist across devices or after cache clear
-                if ((!userProfile || !userProfile.role) && isFirebaseConfigured) {
-                    try {
-                        console.log('Auth: Fetching user profile from Firestore...');
-                        const { getFirestore, doc, getDoc } = await import('firebase/firestore');
-                        const db = getFirestore();
-                        const docSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
-                        if (docSnap.exists()) {
-                            const cloudData = docSnap.data();
-                            userProfile = { ...userProfile, ...cloudData };
-                            // Update local cache
-                            localStorage.setItem(`user_profile_${firebaseUser.uid}`, JSON.stringify(userProfile));
-                        }
-                    } catch (error) {
-                        console.error('Auth: Failed to fetch user profile from cloud:', error);
-                    }
-                }
+                // Note: We could fetch from Firestore here too, but for speed we rely on local first
+                // A separate sync effect could update local from cloud if needed
 
                 setUser({ ...firebaseUser, ...userProfile, isAdmin });
             } else {
@@ -116,11 +98,11 @@ export function AuthProvider({ children }) {
             const userProfile = {
                 uid: user.uid,
                 email: user.email,
-                role: null, // Explicitly null to trigger selection wizard
-                isVerified: false,
+                role: additionalData.role || 'student', // Default to student
+                rollNo: additionalData.rollNo || '',
+                mobile: additionalData.mobile || '',
                 schoolCode: additionalData.schoolCode || '',
-                createdAt: new Date().toISOString(),
-                ...additionalData
+                createdAt: new Date().toISOString()
             };
 
             // Save to Firestore (if configured)
@@ -208,7 +190,6 @@ export function AuthProvider({ children }) {
             if (role === 'student') {
                 // id1 = GR No, id2 = Gov ID/Email/Mobile
                 // PASS schoolCode to DB service for remote lookup
-                console.log(`AuthContext: Verifying Student -> GR: ${id1}, ID: ${id2}, SchoolCode: ${schoolCode}`);
                 const result = await db.verifyStudent(id1, id2, schoolCode);
                 if (result && result.success) {
                     return { success: true, data: result.data };

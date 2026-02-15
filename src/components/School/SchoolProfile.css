@@ -437,20 +437,41 @@
     .profile-header {
         flex-direction: column;
         gap: 16px;
+        align-items: center;
+        /* Center items horizontally */
+        text-align: center;
+        /* Center text */
     }
 
     .school-info {
         flex-direction: column;
-        text-align: center;
+        align-items: center;
+        /* Center items in flex col */
+        gap: 12px;
+        width: 100%;
+    }
+
+    .school-logo {
+        margin: 0 auto;
+        /* Center logo image */
     }
 
     .header-actions {
         width: 100%;
         justify-content: center;
+        flex-wrap: wrap;
+        /* Stack buttons if needed */
     }
 
     .school-info h1 {
-        font-size: 22px;
+        font-size: 24px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .school-info p {
+        text-align: center;
+        width: 100%;
     }
 
     .facilities-grid {

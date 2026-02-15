@@ -100,8 +100,7 @@ function AppContent() {
     const [showRoleSelection, setShowRoleSelection] = useState(false);
 
     useEffect(() => {
-        // Show modal if user is logged in but hasn't selected a role OR hasn't completed verification
-        if (isAuthenticated && user && (!user.role || !user.isVerified)) {
+        if (isAuthenticated && user && !user.role) {
             setShowRoleSelection(true);
         } else {
             setShowRoleSelection(false);

@@ -183,7 +183,7 @@
     border-radius: 3px;
 }
 
-```
+
 
 /* Batch Controls */
 .batch-controls {
@@ -351,15 +351,19 @@
     .control-group {
         flex: 1;
         min-width: 120px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
     }
 
     .control-group label {
         font-size: var(--text-xs);
-        margin-bottom: 2px;
+        margin-bottom: 0;
     }
 
     .control-group .input-field {
         min-width: unset;
+        width: 100%;
         padding: 6px 8px;
         font-size: var(--text-sm);
     }

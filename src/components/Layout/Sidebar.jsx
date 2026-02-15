@@ -168,383 +168,433 @@ export default function Sidebar({
 
                 {isOpen && (
                     <div className="sidebar-content">
-                        {/* School Logo Upload */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">
-                                <ImageIcon size={16} />
-                                {t('sidebar.schoolLogo', 'School Logo')}
-                            </label>
-                            <div className="logo-upload-area">
-                                {schoolLogo ? (
-                                    <div className="logo-preview">
-                                        <img src={schoolLogo} alt="School Logo" />
-                                        <button
-                                            className="remove-logo-btn"
-                                            onClick={() => setSchoolLogo('')}
+                        {/* 1. STUDENT VIEW */}
+                        {user?.role === 'student' ? (
+                            <>
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label">Student Menu</label>
+                                    <button className="sidebar-action-btn primary" onClick={onOpenProfile}>
+                                        <StudentProfileIcon size={16} />
+                                        My Profile
+                                    </button>
+                                </div>
+                                <div className="sidebar-divider" />
+
+                                {/* Special Features for Students */}
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label"><SparklesIcon size={14} /> Special Features</label>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenFamilyTree}>
+                                        <GitBranchIcon size={16} />
+                                        {t('sidebar.familyTree', 'Family Tree')}
+                                    </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenTimeline}>
+                                        <ClockIcon size={16} />
+                                        {t('sidebar.progressTimeline', 'Progress Timeline')}
+                                    </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenPhotoEnhance}>
+                                        <PhotoIcon size={16} />
+                                        {t('sidebar.photoEnhance', 'Photo Enhancement')}
+                                    </button>
+                                </div>
+                                <div className="sidebar-divider" />
+
+                                {/* Help for Students */}
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label">Help & Suggestions</label>
+                                    <button className="sidebar-action-btn success" onClick={onOpenWhatsApp}>
+                                        <MessageCircleIcon size={16} />
+                                        WhatsApp Support
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            /* 2. TEACHER & HOI VIEW */
+                            <>
+                                {/* HOI ONLY: School Identity & Admin Controls */}
+                                {user?.role !== 'teacher' && (
+                                    <>
+                                        {/* School Logo Upload */}
+                                        <div className="sidebar-section">
+                                            <label className="sidebar-label">
+                                                <ImageIcon size={16} />
+                                                {t('sidebar.schoolLogo', 'School Logo')}
+                                            </label>
+                                            <div className="logo-upload-area">
+                                                {schoolLogo ? (
+                                                    <div className="logo-preview">
+                                                        <img src={schoolLogo} alt="School Logo" />
+                                                        <button
+                                                            className="remove-logo-btn"
+                                                            onClick={() => setSchoolLogo('')}
+                                                        >
+                                                            <XIcon size={14} />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <label className="upload-logo-btn">
+                                                        <input
+                                                            ref={logoInputRef}
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={handleLogoUpload}
+                                                            style={{ display: 'none' }}
+                                                        />
+                                                        <UploadIcon size={20} />
+                                                        <span>{t('sidebar.uploadLogo', 'Upload Logo')}</span>
+                                                    </label>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* School Name */}
+                                        <div className="sidebar-section">
+                                            <label className="sidebar-label">
+                                                <SchoolIcon size={16} />
+                                                {t('sidebar.schoolName', 'School Name')}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="input-field"
+                                                placeholder={t('placeholders.enterSchoolName', 'Enter school name...')}
+                                                value={schoolName}
+                                                onChange={(e) => setSchoolName(e.target.value)}
+                                            />
+                                        </div>
+
+                                        {/* School Contact */}
+                                        <div className="sidebar-section">
+                                            <label className="sidebar-label">
+                                                <PhoneIcon size={16} />
+                                                {t('sidebar.schoolContact', 'School Contact')}
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                className="input-field"
+                                                placeholder={t('placeholders.schoolPhone', 'School phone number...')}
+                                                value={schoolContact || ''}
+                                                onChange={(e) => setSchoolContact(e.target.value)}
+                                            />
+                                        </div>
+
+                                        {/* School Email */}
+                                        <div className="sidebar-section">
+                                            <label className="sidebar-label">
+                                                <MailIcon size={16} />
+                                                {t('sidebar.schoolEmail', 'School Email')}
+                                            </label>
+                                            <input
+                                                type="email"
+                                                className="input-field"
+                                                placeholder={t('placeholders.schoolEmail', 'school@example.com')}
+                                                value={schoolEmail || ''}
+                                                onChange={(e) => setSchoolEmail(e.target.value)}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Teacher Name */}
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label">
+                                        <UsersIcon size={16} />
+                                        {t('sidebar.teacherName', 'Teacher Name')}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="input-field"
+                                        placeholder={t('placeholders.teacherName', 'Class teacher name...')}
+                                        value={teacherName}
+                                        onChange={(e) => setTeacherName(e.target.value)}
+                                    />
+                                </div>
+
+                                {/* Standard Selection */}
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label">
+                                        <BookOpenIcon size={16} />
+                                        {t('sidebar.standardClass', 'Standard / Class')}
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <select
+                                            className="input-field"
+                                            value={selectedStandard}
+                                            onChange={(e) => setSelectedStandard(e.target.value)}
                                         >
-                                            <XIcon size={14} />
+                                            <option value="">{t('placeholders.selectStandard', 'Select Standard')}</option>
+                                            {standards.map(std => (
+                                                <option key={std.id} value={std.id}>{std.name}</option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            className="btn btn-accent btn-icon"
+                                            onClick={() => setShowAddStandard(!showAddStandard)}
+                                            title="Add Class"
+                                        >
+                                            <PlusIcon size={18} />
+                                        </button>
+                                        <button
+                                            className="btn btn-ghost btn-icon danger"
+                                            style={{ minWidth: '44px', minHeight: '44px' }}
+                                            onClick={() => {
+                                                if (selectedStandard && onDeleteStandard) {
+                                                    // Skip confirmation - it blocks on mobile
+                                                    console.log('Deleting class:', selectedStandard);
+                                                    onDeleteStandard(selectedStandard);
+                                                }
+                                            }}
+                                            disabled={!selectedStandard}
+                                            title="Delete Selected Class"
+                                        >
+                                            <TrashIcon size={24} color="#EF4444" />
                                         </button>
                                     </div>
-                                ) : (
-                                    <label className="upload-logo-btn">
-                                        <input
-                                            ref={logoInputRef}
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleLogoUpload}
-                                            style={{ display: 'none' }}
-                                        />
-                                        <UploadIcon size={20} />
-                                        <span>{t('sidebar.uploadLogo', 'Upload Logo')}</span>
-                                    </label>
-                                )}
-                            </div>
-                        </div>
 
-                        {/* School Name */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">
-                                <SchoolIcon size={16} />
-                                {t('sidebar.schoolName', 'School Name')}
-                            </label>
-                            <input
-                                type="text"
-                                className="input-field"
-                                placeholder={t('placeholders.enterSchoolName', 'Enter school name...')}
-                                value={schoolName}
-                                onChange={(e) => setSchoolName(e.target.value)}
-                            />
-                        </div>
-
-                        {/* School Contact */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">
-                                <PhoneIcon size={16} />
-                                {t('sidebar.schoolContact', 'School Contact')}
-                            </label>
-                            <input
-                                type="tel"
-                                className="input-field"
-                                placeholder={t('placeholders.schoolPhone', 'School phone number...')}
-                                value={schoolContact || ''}
-                                onChange={(e) => setSchoolContact(e.target.value)}
-                            />
-                        </div>
-
-                        {/* School Email */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">
-                                <MailIcon size={16} />
-                                {t('sidebar.schoolEmail', 'School Email')}
-                            </label>
-                            <input
-                                type="email"
-                                className="input-field"
-                                placeholder={t('placeholders.schoolEmail', 'school@example.com')}
-                                value={schoolEmail || ''}
-                                onChange={(e) => setSchoolEmail(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Teacher Name */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">
-                                <UsersIcon size={16} />
-                                {t('sidebar.teacherName', 'Teacher Name')}
-                            </label>
-                            <input
-                                type="text"
-                                className="input-field"
-                                placeholder={t('placeholders.teacherName', 'Class teacher name...')}
-                                value={teacherName}
-                                onChange={(e) => setTeacherName(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Standard Selection */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">
-                                <BookOpenIcon size={16} />
-                                {t('sidebar.standardClass', 'Standard / Class')}
-                            </label>
-                            <div className="flex gap-2">
-                                <select
-                                    className="input-field"
-                                    value={selectedStandard}
-                                    onChange={(e) => setSelectedStandard(e.target.value)}
-                                >
-                                    <option value="">{t('placeholders.selectStandard', 'Select Standard')}</option>
-                                    {standards.map(std => (
-                                        <option key={std.id} value={std.id}>{std.name}</option>
-                                    ))}
-                                </select>
-                                <button
-                                    className="btn btn-accent btn-icon"
-                                    onClick={() => setShowAddStandard(!showAddStandard)}
-                                    title="Add Class"
-                                >
-                                    <PlusIcon size={18} />
-                                </button>
-                                <button
-                                    className="btn btn-ghost btn-icon danger"
-                                    style={{ minWidth: '44px', minHeight: '44px' }}
-                                    onClick={() => {
-                                        if (selectedStandard && onDeleteStandard) {
-                                            // Skip confirmation - it blocks on mobile
-                                            console.log('Deleting class:', selectedStandard);
-                                            onDeleteStandard(selectedStandard);
-                                        }
-                                    }}
-                                    disabled={!selectedStandard}
-                                    title="Delete Selected Class"
-                                >
-                                    <TrashIcon size={24} color="#EF4444" />
-                                </button>
-                            </div>
-
-                            {showAddStandard && (
-                                <div className="inline-form animate-slide-up">
-                                    <input
-                                        type="text"
-                                        className="input-field"
-                                        placeholder={t('placeholders.standardExample', 'e.g. Standard 3-A')}
-                                        value={newStandard}
-                                        onChange={(e) => setNewStandard(e.target.value)}
-                                    />
-                                    <button className="btn btn-primary btn-sm" onClick={handleAddStandard}>
-                                        <CheckIcon size={16} />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="sidebar-divider" />
-
-                        {/* Data Box Management */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">
-                                <SettingsIcon size={16} />
-                                {t('sidebar.manageDataFields', 'Manage Data Fields')}
-                            </label>
-
-                            {/* Add New Field */}
-                            <button
-                                className="sidebar-action-btn"
-                                onClick={() => setShowAddField(!showAddField)}
-                            >
-                                <UserAddIcon size={16} />
-                                {t('sidebar.addNewDataBox', 'Add New Data Box')}
-                            </button>
-
-                            {showAddField && (
-                                <div className="inline-form animate-slide-up">
-                                    <input
-                                        type="text"
-                                        className="input-field"
-                                        placeholder={t('placeholders.fieldName', 'Field name...')}
-                                        value={newFieldName}
-                                        onChange={(e) => setNewFieldName(e.target.value)}
-                                    />
-                                    <button className="btn btn-primary btn-sm" onClick={handleAddField}>
-                                        <CheckIcon size={16} />
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* Show added custom fields */}
-                            {customFields.length > 0 && (
-                                <div className="custom-fields-list">
-                                    {customFields.map(f => (
-                                        <div key={f.id} className="custom-field-item">
-                                            <span>{f.name}</span>
-                                            <button
-                                                className="btn-icon-sm"
-                                                onClick={() => onRemoveDataBox(f.id)}
-                                            >
-                                                <XIcon size={12} />
+                                    {showAddStandard && (
+                                        <div className="inline-form animate-slide-up">
+                                            <input
+                                                type="text"
+                                                className="input-field"
+                                                placeholder={t('placeholders.standardExample', 'e.g. Standard 3-A')}
+                                                value={newStandard}
+                                                onChange={(e) => setNewStandard(e.target.value)}
+                                            />
+                                            <button className="btn btn-primary btn-sm" onClick={handleAddStandard}>
+                                                <CheckIcon size={16} />
                                             </button>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
-                            )}
 
-                            {/* Remove Field */}
-                            <div className="field-action-row">
-                                <select
-                                    className="input-field small"
-                                    value={removeFieldId}
-                                    onChange={(e) => setRemoveFieldId(e.target.value)}
-                                >
-                                    <option value="">{t('sidebar.selectToRemove', 'Select to remove')}</option>
-                                    {allFields.map(f => (
-                                        <option key={f.key || f.id} value={f.key || f.id}>{f.label || f.name}</option>
-                                    ))}
-                                </select>
-                                <button
-                                    className="btn btn-ghost btn-icon danger"
-                                    onClick={() => {
-                                        if (removeFieldId) {
-                                            onRemoveDataBox(removeFieldId);
-                                            setRemoveFieldId('');
-                                        }
-                                    }}
-                                    disabled={!removeFieldId}
-                                >
-                                    <XIcon size={16} />
-                                </button>
-                            </div>
+                                <div className="sidebar-divider" />
 
-                            {/* Rename Field */}
-                            <div className="field-action-row">
-                                <select
-                                    className="input-field small"
-                                    value={renameFieldId}
-                                    onChange={(e) => setRenameFieldId(e.target.value)}
-                                >
-                                    <option value="">{t('sidebar.selectToRename', 'Select to rename')}</option>
-                                    {allFields.map(f => (
-                                        <option key={f.key || f.id} value={f.key || f.id}>{f.label || f.name}</option>
-                                    ))}
-                                </select>
-                                <button
-                                    className="btn btn-ghost btn-icon"
-                                    onClick={() => {
-                                        if (renameFieldId && renameFieldValue) {
-                                            onRenameDataBox(renameFieldId, renameFieldValue);
-                                            setRenameFieldId('');
-                                            setRenameFieldValue('');
-                                        }
-                                    }}
-                                >
-                                    <EditIcon size={16} />
-                                </button>
-                            </div>
-                            {renameFieldId && (
-                                <div className="inline-form animate-slide-up">
-                                    <input
-                                        type="text"
-                                        className="input-field small"
-                                        placeholder={t('placeholders.newName', 'New name...')}
-                                        value={renameFieldValue}
-                                        onChange={(e) => setRenameFieldValue(e.target.value)}
-                                    />
+                                {/* Data Box Management */}
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label">
+                                        <SettingsIcon size={16} />
+                                        {t('sidebar.manageDataFields', 'Manage Data Fields')}
+                                    </label>
+
+                                    {/* Add New Field */}
                                     <button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={() => {
-                                            if (renameFieldId && renameFieldValue) {
-                                                onRenameDataBox(renameFieldId, renameFieldValue);
-                                                setRenameFieldId('');
-                                                setRenameFieldValue('');
-                                            }
-                                        }}
-                                        disabled={!renameFieldValue}
+                                        className="sidebar-action-btn"
+                                        onClick={() => setShowAddField(!showAddField)}
                                     >
-                                        <SaveIcon size={14} />
+                                        <UserAddIcon size={16} />
+                                        {t('sidebar.addNewDataBox', 'Add New Data Box')}
+                                    </button>
+
+                                    {showAddField && (
+                                        <div className="inline-form animate-slide-up">
+                                            <input
+                                                type="text"
+                                                className="input-field"
+                                                placeholder={t('placeholders.fieldName', 'Field name...')}
+                                                value={newFieldName}
+                                                onChange={(e) => setNewFieldName(e.target.value)}
+                                            />
+                                            <button className="btn btn-primary btn-sm" onClick={handleAddField}>
+                                                <CheckIcon size={16} />
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Show added custom fields */}
+                                    {customFields.length > 0 && (
+                                        <div className="custom-fields-list">
+                                            {customFields.map(f => (
+                                                <div key={f.id} className="custom-field-item">
+                                                    <span>{f.name}</span>
+                                                    <button
+                                                        className="btn-icon-sm"
+                                                        onClick={() => onRemoveDataBox(f.id)}
+                                                    >
+                                                        <XIcon size={12} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Remove Field */}
+                                    <div className="field-action-row">
+                                        <select
+                                            className="input-field small"
+                                            value={removeFieldId}
+                                            onChange={(e) => setRemoveFieldId(e.target.value)}
+                                        >
+                                            <option value="">{t('sidebar.selectToRemove', 'Select to remove')}</option>
+                                            {allFields.map(f => (
+                                                <option key={f.key || f.id} value={f.key || f.id}>{f.label || f.name}</option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            className="btn btn-ghost btn-icon danger"
+                                            onClick={() => {
+                                                if (removeFieldId) {
+                                                    onRemoveDataBox(removeFieldId);
+                                                    setRemoveFieldId('');
+                                                }
+                                            }}
+                                            disabled={!removeFieldId}
+                                        >
+                                            <XIcon size={16} />
+                                        </button>
+                                    </div>
+
+                                    {/* Rename Field */}
+                                    <div className="field-action-row">
+                                        <select
+                                            className="input-field small"
+                                            value={renameFieldId}
+                                            onChange={(e) => setRenameFieldId(e.target.value)}
+                                        >
+                                            <option value="">{t('sidebar.selectToRename', 'Select to rename')}</option>
+                                            {allFields.map(f => (
+                                                <option key={f.key || f.id} value={f.key || f.id}>{f.label || f.name}</option>
+                                            ))}
+                                        </select>
+                                        <button
+                                            className="btn btn-ghost btn-icon"
+                                            onClick={() => {
+                                                if (renameFieldId && renameFieldValue) {
+                                                    onRenameDataBox(renameFieldId, renameFieldValue);
+                                                    setRenameFieldId('');
+                                                    setRenameFieldValue('');
+                                                }
+                                            }}
+                                        >
+                                            <EditIcon size={16} />
+                                        </button>
+                                    </div>
+                                    {renameFieldId && (
+                                        <div className="inline-form animate-slide-up">
+                                            <input
+                                                type="text"
+                                                className="input-field small"
+                                                placeholder={t('placeholders.newName', 'New name...')}
+                                                value={renameFieldValue}
+                                                onChange={(e) => setRenameFieldValue(e.target.value)}
+                                            />
+                                            <button
+                                                className="btn btn-primary btn-sm"
+                                                onClick={() => {
+                                                    if (renameFieldId && renameFieldValue) {
+                                                        onRenameDataBox(renameFieldId, renameFieldValue);
+                                                        setRenameFieldId('');
+                                                        setRenameFieldValue('');
+                                                    }
+                                                }}
+                                                disabled={!renameFieldValue}
+                                            >
+                                                <SaveIcon size={14} />
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="sidebar-divider" />
+
+                                {/* Quick Actions */}
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label">{t('sidebar.quickActions', 'Quick Actions')}</label>
+
+                                    <button className="sidebar-action-btn primary" onClick={onSaveSettings}>
+                                        <SaveIcon size={16} />
+                                        {t('sidebar.saveSettings', 'Save Settings')}
+                                    </button>
+
+                                    <button className="sidebar-action-btn" onClick={onOpenProfile}>
+                                        <StudentProfileIcon size={16} />
+                                        {t('sidebar.studentProfile', 'Student Profile')}
+                                    </button>
+
+                                    <button className="sidebar-action-btn" onClick={onGoToSheet}>
+                                        <FileTextIcon size={16} />
+                                        {t('sidebar.goToSheet', 'Go to Sheet')}
+                                    </button>
+
+                                    <button className="sidebar-action-btn accent" onClick={onImportExcel}>
+                                        <ImportIcon size={16} />
+                                        {t('sidebar.importExcel', 'Import from Excel')}
                                     </button>
                                 </div>
-                            )}
-                        </div>
 
-                        <div className="sidebar-divider" />
+                                <div className="sidebar-divider" />
 
-                        {/* Quick Actions */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">{t('sidebar.quickActions', 'Quick Actions')}</label>
+                                {/* Phase 10: Unique Features */}
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label"><SparklesIcon size={14} /> {t('sidebar.specialFeatures', 'Special Features')}</label>
 
-                            <button className="sidebar-action-btn primary" onClick={onSaveSettings}>
-                                <SaveIcon size={16} />
-                                {t('sidebar.saveSettings', 'Save Settings')}
-                            </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenCertificate}>
+                                        <AwardIcon size={16} />
+                                        {t('sidebar.certificateGenerator', 'Certificate Generator')}
+                                    </button>
 
-                            <button className="sidebar-action-btn" onClick={onOpenProfile}>
-                                <StudentProfileIcon size={16} />
-                                {t('sidebar.studentProfile', 'Student Profile')}
-                            </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenAnalytics}>
+                                        <BarChartIcon size={16} />
+                                        {t('sidebar.analyticsDashboard', 'Analytics Dashboard')}
+                                    </button>
 
-                            <button className="sidebar-action-btn" onClick={onGoToSheet}>
-                                <FileTextIcon size={16} />
-                                {t('sidebar.goToSheet', 'Go to Sheet')}
-                            </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenQRAttendance}>
+                                        <QrCodeIcon size={16} />
+                                        {t('sidebar.qrAttendance', 'QR Attendance')}
+                                    </button>
 
-                            <button className="sidebar-action-btn accent" onClick={onImportExcel}>
-                                <ImportIcon size={16} />
-                                {t('sidebar.importExcel', 'Import from Excel')}
-                            </button>
-                        </div>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenSmartSearch}>
+                                        <WandIcon size={16} />
+                                        {t('sidebar.smartSearch', 'Smart Search')}
+                                    </button>
 
-                        <div className="sidebar-divider" />
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenDocScanner}>
+                                        <CameraIcon size={16} />
+                                        {t('sidebar.docScanner', 'Document Scanner')}
+                                    </button>
 
-                        {/* Phase 10: Unique Features */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label"><SparklesIcon size={14} /> {t('sidebar.specialFeatures', 'Special Features')}</label>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenVoiceInput}>
+                                        <MicIcon size={16} />
+                                        {t('sidebar.voiceInput', 'Voice Input')}
+                                    </button>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenCertificate}>
-                                <AwardIcon size={16} />
-                                {t('sidebar.certificateGenerator', 'Certificate Generator')}
-                            </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenFamilyTree}>
+                                        <GitBranchIcon size={16} />
+                                        {t('sidebar.familyTree', 'Family Tree')}
+                                    </button>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenAnalytics}>
-                                <BarChartIcon size={16} />
-                                {t('sidebar.analyticsDashboard', 'Analytics Dashboard')}
-                            </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenTimeline}>
+                                        <ClockIcon size={16} />
+                                        {t('sidebar.progressTimeline', 'Progress Timeline')}
+                                    </button>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenQRAttendance}>
-                                <QrCodeIcon size={16} />
-                                {t('sidebar.qrAttendance', 'QR Attendance')}
-                            </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenWhatsApp}>
+                                        <MessageCircleIcon size={16} />
+                                        {t('sidebar.whatsappMessenger', 'WhatsApp Messenger')}
+                                    </button>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenSmartSearch}>
-                                <WandIcon size={16} />
-                                {t('sidebar.smartSearch', 'Smart Search')}
-                            </button>
+                                    <button className="sidebar-action-btn gradient-btn" onClick={onOpenPhotoEnhance}>
+                                        <PhotoIcon size={16} />
+                                        {t('sidebar.photoEnhance', 'Photo Enhancement')}
+                                    </button>
+                                </div>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenDocScanner}>
-                                <CameraIcon size={16} />
-                                {t('sidebar.docScanner', 'Document Scanner')}
-                            </button>
+                                <div className="sidebar-divider" />
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenVoiceInput}>
-                                <MicIcon size={16} />
-                                {t('sidebar.voiceInput', 'Voice Input')}
-                            </button>
+                                {/* Class Management */}
+                                <div className="sidebar-section">
+                                    <label className="sidebar-label">{t('sidebar.classManagement', 'Class Management')}</label>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenFamilyTree}>
-                                <GitBranchIcon size={16} />
-                                {t('sidebar.familyTree', 'Family Tree')}
-                            </button>
+                                    <button className="sidebar-action-btn success" onClick={onUpgradeClass}>
+                                        <ArrowUpCircleIcon size={16} />
+                                        {t('sidebar.upgradeClass', 'Upgrade Class')}
+                                    </button>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenTimeline}>
-                                <ClockIcon size={16} />
-                                {t('sidebar.progressTimeline', 'Progress Timeline')}
-                            </button>
+                                    <button className="sidebar-action-btn warning" onClick={onDowngradeClass}>
+                                        <ArrowDownCircleIcon size={16} />
+                                        {t('sidebar.downgradeClass', 'Downgrade Class')}
+                                    </button>
+                                </div>
 
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenWhatsApp}>
-                                <MessageCircleIcon size={16} />
-                                {t('sidebar.whatsappMessenger', 'WhatsApp Messenger')}
-                            </button>
-
-                            <button className="sidebar-action-btn gradient-btn" onClick={onOpenPhotoEnhance}>
-                                <PhotoIcon size={16} />
-                                {t('sidebar.photoEnhance', 'Photo Enhancement')}
-                            </button>
-                        </div>
-
-                        <div className="sidebar-divider" />
-
-                        {/* Class Management */}
-                        <div className="sidebar-section">
-                            <label className="sidebar-label">{t('sidebar.classManagement', 'Class Management')}</label>
-
-                            <button className="sidebar-action-btn success" onClick={onUpgradeClass}>
-                                <ArrowUpCircleIcon size={16} />
-                                {t('sidebar.upgradeClass', 'Upgrade Class')}
-                            </button>
-
-                            <button className="sidebar-action-btn warning" onClick={onDowngradeClass}>
-                                <ArrowDownCircleIcon size={16} />
-                                {t('sidebar.downgradeClass', 'Downgrade Class')}
-                            </button>
-                        </div>
+                            </>
+                        )}
 
                         <div className="sidebar-divider" />
 

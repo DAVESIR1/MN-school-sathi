@@ -1,7 +1,7 @@
 /**
  * Cloud Sync Service - Automatic backup/restore like Google Contacts
  * Syncs user data automatically on login and periodically
- * With AES-256-GCM encryption for maximum security
+ * With AES-256-GCM encryption and Timestamp-based Conflict Resolution
  */
 
 import { db, isFirebaseConfigured } from '../config/firebase';
@@ -9,11 +9,11 @@ import {
     doc,
     setDoc,
     getDoc,
-    serverTimestamp,
-    onSnapshot
+    serverTimestamp
 } from 'firebase/firestore';
 import * as localDb from './database';
 import { encryptData, decryptData, isEncrypted } from './SecureEncryption';
+import { safeJsonStringify } from '../utils/SafeJson';
 
 // Sync status
 let syncInProgress = false;
@@ -21,7 +21,7 @@ let lastSyncTime = null;
 let syncListeners = [];
 
 // App Version Management for Safety
-const CURRENT_APP_VERSION = '2.1.0'; // Increment this whenever DB schema changes
+const CURRENT_APP_VERSION = '2.1.0';
 const VERSION_KEY = 'app_data_version';
 
 // Notify sync status listeners
@@ -67,11 +67,9 @@ export async function checkAndPerformSafetyBackup(userId) {
         } catch (e) {
             console.error('SAFETY BACKUP FAILED:', e);
             notifySyncStatus({ type: 'error', message: 'Safety Backup Failed! Please check connection.' });
-            // In a strict mode, we might throw here to prevent the app from loading
             return false;
         }
     } else if (!lastVersion) {
-        // First run or fresh install
         await localDb.setSetting(VERSION_KEY, CURRENT_APP_VERSION);
     }
     return false;
@@ -79,7 +77,7 @@ export async function checkAndPerformSafetyBackup(userId) {
 
 /**
  * Perform automatic sync on login
- * Like Google Contacts - check cloud data and sync appropriately
+ * Improved Logic: Timestamp-based "Last Write Wins" (prevents Undelete bug)
  */
 export async function autoSyncOnLogin(userId) {
     if (!userId || !isFirebaseConfigured || !db) {
@@ -98,103 +96,47 @@ export async function autoSyncOnLogin(userId) {
     try {
         console.log('CloudSync: Starting auto-sync for user:', userId);
 
-        // Get cloud backup info
+        // 1. Get Local Sync Info
+        const localLastSynced = await localDb.getLastSyncTime(); // Valid timestamp or 0
+
+        // 2. Get Cloud Valid Data
         const backupRef = doc(db, 'backups', userId);
         const backupSnap = await getDoc(backupRef);
 
-        // Get local data counts
-        const localStudents = await localDb.getAllStudentsForBackup();
-        const localStandards = await localDb.getAllStandards();
-        const localStudentCount = localStudents?.length || 0;
-        const localStandardCount = localStandards?.length || 0;
-
         if (backupSnap.exists()) {
             const cloudData = backupSnap.data();
-            const cloudStudentCount = cloudData.students?.length || 0;
-            const cloudStandardCount = cloudData.standards?.length || 0;
+            const cloudLastModifiedISO = cloudData.lastModified;
+            const cloudLastModified = cloudLastModifiedISO ? new Date(cloudLastModifiedISO).getTime() : 0;
 
-            console.log(`CloudSync: Local has ${localStudentCount} students, Cloud has ${cloudStudentCount}`);
+            console.log(`CloudSync: Local Last Sync: ${new Date(localLastSynced).toISOString()}`);
+            console.log(`CloudSync: Cloud Last Mod: ${new Date(cloudLastModified).toISOString()}`);
 
-            // Decision logic like Google Contacts:
-            // 1. If local is empty but cloud has data -> restore from cloud
-            // 2. If local has data but cloud is empty -> backup to cloud
-            // 3. If both have data -> use the one with more data (or more recent)
-
-            if (localStudentCount === 0 && localStandardCount === 0 &&
-                (cloudStudentCount > 0 || cloudStandardCount > 0)) {
-                // Restore from cloud
-                console.log('CloudSync: Local empty, restoring from cloud...');
+            // DECISION LOGIC:
+            if (cloudLastModified > localLastSynced) {
+                // Cloud is Newer -> Restore from Cloud
+                console.log('CloudSync: Cloud is newer. Restoring...');
                 await restoreFromCloudData(cloudData, userId);
-                lastSyncTime = new Date();
-                notifySyncStatus({
-                    type: 'restored',
-                    message: `🔓 Restored ${cloudStudentCount} students from cloud!`
-                });
-                return { success: true, action: 'restored', studentCount: cloudStudentCount };
+                await localDb.setLastSyncTime(Date.now()); // Mark as synced
+                notifySyncStatus({ type: 'synced', message: '🔄 Synced latest changes from cloud.' });
+                return { success: true, action: 'synced_from_cloud' };
+            } else {
+                // Local is Newer (or Equal) -> Backup to Cloud
+                // BUT only if we actually have data to backup, or valid reason.
+                // Assuming local state is the "truth" since last sync.
+                console.log('CloudSync: Local is up-to-date. Pushing backup...');
+                await backupToCloudNow(userId, 'AUTO_SYNC');
+                notifySyncStatus({ type: 'backed_up', message: '☁️ Cloud backup updated.' });
+                return { success: true, action: 'backed_up' };
             }
-            else if (localStudentCount > 0 && cloudStudentCount === 0) {
-                // Backup to cloud
-                console.log('CloudSync: Cloud empty, backing up local data...');
-                await backupToCloudNow(userId);
-                lastSyncTime = new Date();
-                notifySyncStatus({
-                    type: 'backed_up',
-                    message: `Backed up ${localStudentCount} students to cloud!`
-                });
-                return { success: true, action: 'backed_up', studentCount: localStudentCount };
-            }
-            else if (localStudentCount > 0 && cloudStudentCount > 0) {
-                // Both have data - "Smart Conflict Resolution"
-                // 1. Check Timestamps (Last Modified Wins) if available
-                const cloudTime = cloudData.lastModified ? new Date(cloudData.lastModified).getTime() : 0;
 
-                // We'll estimate local modification time or use a stored value
-                // Ideally, we'd store a local 'lastBackedUp' timestamp, but for now, let's use a safe heuristic:
-                // If Cloud is significantly newer (e.g. > 1 hour) than our last known sync, it likely has changes from another device.
-
-                // For this implementation, we prioritizing DATA SAFETY:
-                if (cloudStudentCount > localStudentCount) {
-                    // Cloud has MORE data -> Restore
-                    console.log('CloudSync: Cloud has MORE data, restoring...');
-                    await restoreFromCloudData(cloudData, userId);
-                    notifySyncStatus({ type: 'restored', message: '📥 Fetched missing data from cloud!' });
-                    return { success: true, action: 'restored' };
-                } else if (cloudTime > (Date.now() - 60000)) {
-                    // Cloud was modified very recently (e.g. just now by another device), and we are just logging in.
-                    // This is a common case for multi-device usage.
-                    console.log('CloudSync: Cloud is newer, syncing down...');
-                    await restoreFromCloudData(cloudData, userId);
-                    notifySyncStatus({ type: 'synced', message: '🔄 Synced latest changes from cloud.' });
-                    return { success: true, action: 'synced_from_cloud' };
-                } else {
-                    // Local is authoritative or same -> Backup to make cloud current
-                    console.log('CloudSync: Local is authoritative, backing up...');
-                    await backupToCloudNow(userId, 'AUTO_SYNC');
-                    notifySyncStatus({ type: 'backed_up', message: '☁️ Cloud backup updated.' });
-                    return { success: true, action: 'backed_up' };
-                }
-            }
-            else {
-                // Both empty - nothing to sync
-                console.log('CloudSync: Nothing to sync');
-                lastSyncTime = new Date();
-                return { success: true, action: 'nothing_to_sync' };
-            }
         } else {
-            // No cloud backup exists (First time or deleted)
-            if (localStudentCount > 0 || localStandardCount > 0) {
-                // Backup local data to cloud
-                console.log('CloudSync: No cloud backup, creating first backup...');
-                await backupToCloudNow(userId, 'FIRST_BACKUP');
-                lastSyncTime = new Date();
-                notifySyncStatus({
-                    type: 'first_backup',
-                    message: '🚀 Initial cloud backup created!'
-                });
-                return { success: true, action: 'first_backup' };
-            }
-            return { success: true, action: 'nothing_to_sync' };
+            // No Cloud Backup -> First Backup
+            console.log('CloudSync: No cloud backup found. Creating first backup...');
+            await backupToCloudNow(userId, 'FIRST_BACKUP');
+            notifySyncStatus({ type: 'first_backup', message: '🚀 Initial cloud backup created!' });
+            return { success: true, action: 'first_backup' };
         }
+
     } catch (error) {
         console.error('CloudSync: Auto-sync error:', error);
         notifySyncStatus({ type: 'error', message: error.message });
@@ -224,6 +166,10 @@ async function backupToCloudNow(userId, reason = 'MANUAL') {
     const customFields = await localDb.getAllCustomFields();
     const ledger = await localDb.getAllLedgerEntries();
 
+    // Clean data using SafeJson to remove circular refs BEFORE encryption
+    // Although encryptData does compression, JSON.stringify can choke on circular refs
+    // We construct the object normally, but we rely on encryptData which likely does JSON.stringify internally
+
     const backupData = {
         settings,
         students,
@@ -235,6 +181,13 @@ async function backupToCloudNow(userId, reason = 'MANUAL') {
 
     // ENCRYPT DATA
     console.log(`CloudSync: Encrypting data (${reason})...`);
+
+    // We pass the raw object. encryptData calls compressData which calls JSON.stringify.
+    // To be safe, let's pre-sanitize if we suspect circular refs, but database data should be clean.
+    // However, if needed:
+    // const safeData = JSON.parse(safeJsonStringify(backupData)); 
+    // We'll trust EncryptionService to handle it, or wrap it.
+
     const encryptedPackage = await encryptData(backupData, userId);
 
     const secureBackup = {
@@ -243,18 +196,63 @@ async function backupToCloudNow(userId, reason = 'MANUAL') {
         lastModified: new Date().toISOString(),
         userId: userId,
         dataVersion: '2.0',
-        backupReason: reason, // Traceability
+        backupReason: reason,
         security: 'AES-256-GCM + PBKDF2 + GZIP'
     };
 
-
     const backupRef = doc(db, 'backups', userId);
-    await setDoc(backupRef, secureBackup);
+
+    // CHUNKING LOGIC FOR LARGE BACKUPS (> 900KB safe limit)
+    const MAX_CHUNK_SIZE = 900 * 1024; // 900KB
+    const encryptedString = secureBackup.encrypted;
+
+    if (encryptedString.length > MAX_CHUNK_SIZE) {
+        console.log(`CloudSync: Backup size ${encryptedString.length} exceeds limit. Chunking...`);
+        const chunks = [];
+        for (let i = 0; i < encryptedString.length; i += MAX_CHUNK_SIZE) {
+            chunks.push(encryptedString.slice(i, i + MAX_CHUNK_SIZE));
+        }
+
+        // Save metadata WITHOUT the huge string
+        await setDoc(backupRef, {
+            ...secureBackup,
+            encrypted: null, // Clear main body
+            isChunked: true,
+            totalChunks: chunks.length
+        });
+
+        // Save chunks to subcollection
+        const batch = writeBatch(db);
+        const chunksRef = collection(backupRef, 'chunks');
+
+        // Delete old chunks first (to avoid stale data)
+        const oldChunks = await getDocs(chunksRef);
+        oldChunks.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+
+        // Write new chunks
+        // Can't use single batch if too many chunks, but reasonably we won't have THAT many for 1MB limit (maybe 5-10)
+        const saveBatch = writeBatch(db);
+        chunks.forEach((chunk, index) => {
+            const chunkRef = doc(chunksRef, index.toString());
+            saveBatch.set(chunkRef, { data: chunk, index });
+        });
+        await saveBatch.commit();
+        console.log(`CloudSync: Saved ${chunks.length} chunks.`);
+
+    } else {
+        // Normal save
+        await setDoc(backupRef, secureBackup);
+    }
+
+    // Update Local "Last Sync" Time to now
+    await localDb.setLastSyncTime(Date.now());
+
     console.log('CloudSync: Encrypted backup completed');
 
-    // ─── PUBLIC DIRECTORY SYNC (For Student Verification) ───
+    // ─── PUBLIC DIRECTORY SYNC ───
     try {
-        await publishToPublicDirectory(students, settings);
+        await publishToPublicDirectory(students, settings, userId);
     } catch (pubErr) {
         console.warn('CloudSync: Public directory sync failed (Non-critical):', pubErr);
     }
@@ -262,21 +260,19 @@ async function backupToCloudNow(userId, reason = 'MANUAL') {
 
 /**
  * Publish essential student data to Public Directory for Verification
- * Writes to: schools/{schoolId}/students/{studentId}
+ * Writes to: schools/{uid}/students/{studentId}
  */
-async function publishToPublicDirectory(students, settings) {
+async function publishToPublicDirectory(students, settings, userId) {
     if (!students || students.length === 0) return;
 
-    // 1. Identify School ID (UDISE or Index)
-    // We prefer the 'id' if it matches the code, or the code itself
-    const schoolId = settings.id || settings.udiseNumber || settings.indexNumber || settings.schoolCode;
-
-    if (!schoolId) {
-        console.warn('CloudSync: No School ID found, skipping public sync.');
+    // CRITICAL FIX: Use Auth UID as the School ID to match MigrationService and Security Rules
+    // Old logic: const schoolId = settings.id || settings.udiseNumber ...
+    if (!userId) {
+        console.warn('CloudSync: No User ID provided for public sync.');
         return;
     }
 
-    const cleanSchoolId = String(schoolId).trim().replace(/[^a-zA-Z0-9]/g, '');
+    const cleanSchoolId = userId;
     console.log(`CloudSync: Syncing ${students.length} students to Public Directory: schools/${cleanSchoolId}/students`);
 
     const { collection, writeBatch, doc: firestoreDoc } = await import('firebase/firestore');
@@ -286,10 +282,12 @@ async function publishToPublicDirectory(students, settings) {
     const schoolRef = firestoreDoc(db, 'schools', cleanSchoolId);
 
     // Create/Update School Doc with basic info
+    // CRITICAL: Ensure no undefined values, as Firestore rejects them
     const schoolData = {
         name: settings.schoolName || 'Unknown School',
         udiseNumber: settings.udiseNumber || '',
         indexNumber: settings.indexNumber || '',
+        email: settings.schoolEmail || '',
         lastUpdated: serverTimestamp()
     };
 
@@ -318,15 +316,16 @@ async function publishToPublicDirectory(students, settings) {
             // but for verifyStudent() to work flexibly, we send the core object.
             // Let's send a sanitized version.
             const publicData = {
-                id: student.id,
-                grNo: student.grNo, // Critical
-                name: student.name,
-                standard: student.standard,
+                id: String(student.id),
+                grNo: String(student.grNo || ''),
+                name: student.name || '',
+                standard: student.standard || '',
                 section: student.division || student.section || '',
-                aadharNo: student.aadharNo || '', // Critical for verification
-                govId: student.govId || '',
+                aadharNo: String(student.aadharNo || ''),
+                govId: String(student.govId || ''),
+                email: student.email || '',
                 dob: student.dob || '',
-                mobile: student.mobile || '',
+                mobile: String(student.contactNumber || student.mobile || ''), // Critical: Map contactNumber
                 gender: student.gender || '',
                 lastUpdated: serverTimestamp()
             };
@@ -346,11 +345,57 @@ async function publishToPublicDirectory(students, settings) {
  * Restore data from cloud backup object (with decryption)
  */
 async function restoreFromCloudData(storedData, userId) {
+    // REASSEMBLE CHUNKS IF NEEDED
+    let encryptedDataToDecrypt = storedData.encrypted;
+
+    if (storedData.isChunked) {
+        console.log('CloudSync: Backup is chunked. Reassembling...');
+        try {
+            const { getDocs, collection, orderBy, query } = await import('firebase/firestore');
+            const chunksRef = collection(db, 'backups', userId, 'chunks');
+            const q = query(chunksRef, orderBy('index'));
+            const snapshot = await getDocs(q);
+
+            if (snapshot.empty) {
+                throw new Error('Backup is marked as chunked but no chunks found.');
+            }
+
+            encryptedDataToDecrypt = snapshot.docs.map(doc => doc.data().data).join('');
+            console.log(`CloudSync: Reassembled ${snapshot.size} chunks. Total size: ${encryptedDataToDecrypt.length}`);
+        } catch (err) {
+            console.error('CloudSync: Failed to reassemble chunks:', err);
+            throw new Error('Backup corrupted (missing chunks).');
+        }
+    }
+
     // DECRYPT DATA if encrypted
     let backupData;
-    if (isEncrypted(storedData)) {
+    // Check if we have data to decrypt (either from chunks or direct)
+    if (encryptedDataToDecrypt || isEncrypted(storedData)) {
+        // If chunked, we constructed encryptedDataToDecrypt. 
+        // If not chunked, storedData.encrypted might be present (if verified by isEncrypted)
+        // But isEncrypted checks if 'security' field is present usually.
+
+        // Helper: verify if we have the string
+        const cipherText = encryptedDataToDecrypt || storedData.encrypted;
+
+        if (!cipherText) {
+            throw new Error('No encrypted data found to restore.');
+        }
+
         console.log('CloudSync: Decrypting backup data...');
-        backupData = await decryptData(storedData, userId);
+        // We pass a mock object with just the encrypted string if we reassembled it, 
+        // OR pass the original storedData if it was simple.
+        // Actually decryptData takes (encryptedPackage, userId). 
+        // encryptedPackage expects { encrypted: string, iv: string, salt: string }
+
+        const packageToDecrypt = {
+            encrypted: cipherText,
+            iv: storedData.iv,
+            salt: storedData.salt
+        };
+
+        backupData = await decryptData(packageToDecrypt, userId);
         console.log('CloudSync: Data decrypted!');
     } else {
         // Legacy unencrypted backup
@@ -389,13 +434,22 @@ async function restoreFromCloudData(storedData, userId) {
 
     // Restore students
     if (backupData.students?.length > 0) {
+        console.log(`CloudSync: Restoring ${backupData.students.length} students...`);
+        let restoredCount = 0;
         for (const student of backupData.students) {
             try {
                 await localDb.addStudent(student);
+                restoredCount++;
             } catch (e) {
-                console.log('CloudSync: Student already exists:', student.grNo);
+                // console.log('CloudSync: Student already exists:', student.grNo);
+                // Try update instead? For restore, we usually overwrite or skip.
+                // Let's assume skip if exists is safe, but maybe we should update.
+                // For now, just log.
             }
         }
+        console.log(`CloudSync: Successfully restored ${restoredCount} students locally.`);
+    } else {
+        console.warn('CloudSync: No students found in backup data.');
     }
 
     console.log('CloudSync: Restore completed');

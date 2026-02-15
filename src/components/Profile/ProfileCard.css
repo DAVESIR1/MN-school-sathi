@@ -18,6 +18,25 @@
     border-bottom: 3px solid rgba(255, 255, 255, 0.5);
 }
 
+@media (max-width: 640px) {
+    .profile-header {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-4);
+        padding: var(--space-4);
+    }
+
+    .header-left,
+    .header-right {
+        margin: 0 auto;
+    }
+
+    .section-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .header-left,
 .header-right {
     display: flex;
