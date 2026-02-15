@@ -72,7 +72,11 @@ export default function RoleSelectionModal({ isOpen, onComplete }) {
             }
 
             // Student/Teacher Verification
-            const result = await verifyUserCredentials(selectedRole, userId, govId, schoolCode);
+            // Clean inputs for Failproof Mapping
+            const cleanUserId = userId.trim();
+            const cleanGovId = govId.replace(/[\s-]/g, '').trim();
+
+            const result = await verifyUserCredentials(selectedRole, cleanUserId, cleanGovId, schoolCode);
 
             if (result.success) {
                 setVerifiedData(result.data);
