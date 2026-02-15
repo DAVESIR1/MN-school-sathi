@@ -91,6 +91,7 @@ export const DATA_FIELDS = [
             { key: 'schoolLeaveNote', label: 'School Leave Note', type: 'textarea', placeholder: 'Reason for leaving' },
             { key: 'studentPhoto', label: 'Student Photo', type: 'file', accept: 'image/*' },
             { key: 'studentDocuments', label: 'Student Documents Vault', type: 'documents', placeholder: 'Upload documents' },
+            { key: 'issuedCertificates', label: 'Issued Certificates (for Student Download)', type: 'documents', placeholder: 'Upload certificates here' },
         ]
     }
 ];

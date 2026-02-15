@@ -45,6 +45,25 @@
 
 ---
 
+## 🌙 Late Night Updates (Feb 15, 2026)
+### 🔄 Real-Time Student Sync
+- **Live Dashboard:** Student Dashboard now listens to Firestore (`schools/{schoolCode}/students`) for instant updates.
+- **Dynamic Fields:** New fields added by teachers (e.g., "Blood Group") appear automatically without refresh.
+- **Smart School ID:** Dashboard automatically resolves School Code to UID for accurate syncing.
+
+### 🔐 Access Control Refined
+- **Teacher "All Access":** Teachers now have full access to **School** and **Data Management** menus.
+- **HOI Restriction:** Explicitly blocked **HOI Menu** (Staff Info, Diary) for teachers.
+- **Firestore Rules:** Added `corrections` collection permissions for future student edit features.
+
+### ✨ Student UX Polish
+- **Cleaner Sidebar:** Removed redundant "Download PDF" (ID Card) link.
+- **Focused Profile:**
+    -   Hidden "Standard/Student" dropdowns when viewing single student.
+    -   Hidden technical fields (`photoUrl`, `providerId`, etc.) from profile list.
+
+---
+
 ## 📅 Previous Updates (Feb 5, 2026)
 
 ### Profile Viewer UI Enhancements

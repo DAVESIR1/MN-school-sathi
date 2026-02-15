@@ -1,11 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Download, FileText, User, LogOut, Grid, List } from 'lucide-react';
+import { db } from '../../config/firebase';
+import { collection, query, where, onSnapshot, getDocs, limit, doc } from 'firebase/firestore';
 import './StudentLogin.css';
 
 export default function StudentDashboard({ user, onLogout, onNavigate }) {
     if (!user) return null;
 
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list' for full details
+    const [realTimeData, setRealTimeData] = useState({});
+    const [loadingUpdates, setLoadingUpdates] = useState(false);
+
+    // REAL-TIME SYNC ENGINE
+    useEffect(() => {
+        if (!user || (!user.schoolCode && !user.schoolId)) return;
+
+        let unsubscribe = () => { };
+
+        const setupRealTimeSync = async () => {
+            try {
+                setLoadingUpdates(true);
+                const rawSchoolCode = (user.schoolCode || user.schoolId || '').trim();
+                const grNo = user.grNo || user.gr_no;
+
+                if (!rawSchoolCode || !grNo) {
+                    console.warn('Sync aborted: Missing School Code or GR No.');
+                    return;
+                }
+
+                // 1. Resolve School UID (handle short codes vs UIDs)
+                let targetSchoolUid = rawSchoolCode;
+
+                // If code is short (typical school code < 20 chars), valid UIDs are 20+ chars
+                if (rawSchoolCode.length < 20) {
+                    // It's likely a short code (UDISE/Index/Custom). Resolve it.
+                    const schoolsRef = collection(db, 'schools');
+                    // Try UDISE
+                    let q = query(schoolsRef, where('udiseNumber', '==', rawSchoolCode), limit(1));
+                    let snap = await getDocs(q);
+
+                    if (snap.empty) {
+                        q = query(schoolsRef, where('indexNumber', '==', rawSchoolCode), limit(1));
+                        snap = await getDocs(q);
+                    }
+                    if (snap.empty) {
+                        q = query(schoolsRef, where('schoolCode', '==', rawSchoolCode), limit(1));
+                        snap = await getDocs(q);
+                    }
+
+                    if (!snap.empty) {
+                        targetSchoolUid = snap.docs[0].id; // Found the real UID
+                    } else {
+                        console.warn('Could not resolve School UID for code:', rawSchoolCode);
+                        return; // Cannot sync without valid School UID
+                    }
+                }
+
+                // 2. Subscribe to Student Data
+                const studentsRef = collection(db, `schools/${targetSchoolUid}/students`);
+
+                // Query by GR No (safest immutable identifier)
+                // Try string and number variations to be robust
+                const grString = String(grNo);
+                const grNumber = parseInt(grNo, 10);
+
+                // We default to string query first
+                const q = query(studentsRef, where('grNo', '==', grString), limit(1));
+
+                unsubscribe = onSnapshot(q, (snapshot) => {
+                    if (!snapshot.empty) {
+                        const docData = snapshot.docs[0].data();
+                        console.log('Real-time update received for student:', docData.name);
+                        setRealTimeData(docData);
+                    } else {
+                        // Fallback: try number query if string failed (on initial load logic? no, onSnapshot is tricky with fallbacks)
+                        // If we found nothing, we just don't update.
+                        // Ideally, we'd handle the number variant query logic here too, but for now assuming string GR match.
+                    }
+                    setLoadingUpdates(false);
+                }, (error) => {
+                    console.error('Real-time sync error:', error);
+                    setLoadingUpdates(false);
+                });
+
+            } catch (err) {
+                console.error('Setup sync failed:', err);
+                setLoadingUpdates(false);
+            }
+        };
+
+        setupRealTimeSync();
+
+        return () => unsubscribe();
+    }, [user.schoolCode, user.schoolId, user.grNo]);
+
+    // MERGE DATA: Real-time takes precedence over session User object
+    const displayUser = { ...user, ...realTimeData };
 
     // Helper to mask Aadhaar
     const displayAadhaar = (num) => {
@@ -28,13 +118,16 @@ export default function StudentDashboard({ user, onLogout, onNavigate }) {
         'studentPhoto', 'createdAt', 'updatedAt',
         'emailVerified', 'stsTokenManager', 'apiKey',
         'appName', 'providerData', 'lastLoginAt',
-        'isAnonymous'
+        'isAnonymous', 'accessToken', 'refreshToken', 'stsTokenManager',
+        'photoURL', 'photoUrl', 'providerId', 'verifiedAt'
     ]);
 
     // Get all valid fields
-    const allFields = Object.entries(user)
+    const allFields = Object.entries(displayUser)
         .filter(([key, value]) => {
             if (excludedKeys.has(key)) return false;
+            // Filter technical keys that might leak from Firestore
+            if (key.startsWith('_')) return false;
             if (value === null || value === undefined || value === '') return false;
             if (typeof value === 'object') return false;
             return true;

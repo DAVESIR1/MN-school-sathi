@@ -42,6 +42,7 @@ const TeachersProfileList = lazy(() => import('./components/School/TeachersProfi
 const StudentLogin = lazy(() => import('./components/Student/StudentLogin'));
 const CorrectionRequest = lazy(() => import('./components/Student/CorrectionRequest'));
 const QAChat = lazy(() => import('./components/Student/QAChat'));
+const StudentCertificates = lazy(() => import('./components/Student/StudentCertificates'));
 
 const UsageInstructions = lazy(() => import('./components/Features/UsageInstructions'));
 const StudentDashboard = lazy(() => import('./components/Student/StudentDashboard'));
@@ -507,12 +508,12 @@ function AppContent() {
                 setShowMenuContent(false);
                 return null;
             case 'correction-request':
-                return <ComponentErrorBoundary componentName="Correction Request"><CorrectionRequest studentData={null} onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} /></ComponentErrorBoundary>;
+                return <ComponentErrorBoundary componentName="Correction Request"><CorrectionRequest studentData={user} onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} /></ComponentErrorBoundary>;
             case 'certificate-download':
-                // Show certificate generator for student downloads
-                return <ComponentErrorBoundary componentName="Certificate Download"><CertificateGenerator onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} /></ComponentErrorBoundary>;
+                // Show issued certificates for download (uploaded by teacher)
+                return <ComponentErrorBoundary componentName="My Certificates"><StudentCertificates user={user} onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} /></ComponentErrorBoundary>;
             case 'qa-chat':
-                return <ComponentErrorBoundary componentName="Q&A Chat"><QAChat studentData={null} onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} /></ComponentErrorBoundary>;
+                return <ComponentErrorBoundary componentName="Q&A Chat"><QAChat studentData={user} onBack={() => { setShowMenuContent(false); setMenuContentType(null); }} /></ComponentErrorBoundary>;
 
             // Coming Soon items
             case 'dead-stock':
@@ -935,7 +936,7 @@ function AppContent() {
             <ProfileViewer
                 isOpen={showProfile}
                 onClose={() => setShowProfile(false)}
-                students={ledger}
+                students={user?.role === 'student' ? [user] : ledger}
                 standards={standards}
                 schoolName={schoolName}
                 settings={settings}

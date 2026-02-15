@@ -461,7 +461,7 @@ export default function NewSidebar({ isOpen, onToggle, onNavigate, onOpenAdmin, 
                 )}
 
                 {/* Tier Actions - Don't show to students */}
-                {isSidebarVisible && !isStudent && (
+                {isSidebarVisible && user?.role !== 'student' && (
                     <div className="tier-actions animate-fade-in">
                         {isAdmin && onOpenAdmin && (
                             <button className="tier-action-btn admin-btn" onClick={onOpenAdmin}>

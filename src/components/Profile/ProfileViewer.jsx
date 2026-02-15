@@ -66,6 +66,14 @@ export default function ProfileViewer({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Auto-select if only one student (Student View)
+    useEffect(() => {
+        if (students.length === 1) {
+            setSelectedStandard(students[0].standard);
+            setSelectedStudent(students[0]);
+        }
+    }, [students]);
+
     // Calculate filtered students (needs to be before useMemo that depends on it)
     const filteredStudents = useMemo(() => {
         return selectedStandard
@@ -189,43 +197,48 @@ export default function ProfileViewer({
 
                 {/* Controls */}
                 <div className="profile-controls no-print">
-                    <div className="control-group">
-                        <label>Standard:</label>
-                        <select
-                            className="input-field"
-                            value={selectedStandard}
-                            onChange={(e) => {
-                                setSelectedStandard(e.target.value);
-                                setSelectedStudent(null);
-                                setSelectedGrNumbers([]);
-                            }}
-                        >
-                            <option value="">All Standards</option>
-                            {standards.map(std => (
-                                <option key={std.id} value={std.id}>{std.name}</option>
-                            ))}
-                        </select>
-                    </div>
+                    {/* Hide selection controls if only one student (Student Logged In) */}
+                    {students.length > 1 && (
+                        <>
+                            <div className="control-group">
+                                <label>Standard:</label>
+                                <select
+                                    className="input-field"
+                                    value={selectedStandard}
+                                    onChange={(e) => {
+                                        setSelectedStandard(e.target.value);
+                                        setSelectedStudent(null);
+                                        setSelectedGrNumbers([]);
+                                    }}
+                                >
+                                    <option value="">All Standards</option>
+                                    {standards.map(std => (
+                                        <option key={std.id} value={std.id}>{std.name}</option>
+                                    ))}
+                                </select>
+                            </div>
 
-                    {!batchMode && (
-                        <div className="control-group">
-                            <label>Student:</label>
-                            <select
-                                className="input-field"
-                                value={selectedStudent?.id || ''}
-                                onChange={(e) => {
-                                    const student = filteredStudents.find(s => s.id == e.target.value);
-                                    setSelectedStudent(student);
-                                }}
-                            >
-                                <option value="">Select Student</option>
-                                {filteredStudents.map(s => (
-                                    <option key={s.id} value={s.id}>
-                                        {s.name || s.nameEnglish} - GR: {s.grNo}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                            {!batchMode && (
+                                <div className="control-group">
+                                    <label>Student:</label>
+                                    <select
+                                        className="input-field"
+                                        value={selectedStudent?.id || ''}
+                                        onChange={(e) => {
+                                            const student = filteredStudents.find(s => s.id == e.target.value);
+                                            setSelectedStudent(student);
+                                        }}
+                                    >
+                                        <option value="">Select Student</option>
+                                        {filteredStudents.map(s => (
+                                            <option key={s.id} value={s.id}>
+                                                {s.name || s.nameEnglish} - GR: {s.grNo}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </>
                     )}
 
                     <div className="control-group view-toggle">

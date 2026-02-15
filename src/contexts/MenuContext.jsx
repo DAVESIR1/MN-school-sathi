@@ -63,9 +63,8 @@ export const MENU_STRUCTURE = {
         icon: 'studentProfile',
         color: '#F59E0B',
         items: [
-            { id: 'student-login', name: 'Student Login', nameKey: 'auth.login', icon: 'shield', status: 'active' },
+            // { id: 'student-login', name: 'Student Login', nameKey: 'auth.login', icon: 'shield', status: 'active' },
             { id: 'student-view-profile', name: 'View Profile', nameKey: 'profile.viewProfile', icon: 'studentProfile', status: 'active' },
-            { id: 'download-id-card', name: 'Download ID Card', nameKey: 'profile.downloadPdf', icon: 'download', status: 'active' },
             { id: 'correction-request', name: 'Correction Request', nameKey: 'sidebar.correctionRequest', icon: 'edit', status: 'active' },
             { id: 'certificate-download', name: 'Certificate Download', nameKey: 'sidebar.certificateDownload', icon: 'certificate', status: 'active' },
             { id: 'qa-chat', name: 'Q&A Chat', nameKey: 'sidebar.qaChat', icon: 'messageCircle', status: 'active' },
