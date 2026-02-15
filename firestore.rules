@@ -26,25 +26,24 @@ service cloud.firestore {
 
     // 1. SCHOOLS COLLECTION
     // Public Read: Required for "School Code Verification" check.
-    // Admin Write: Only admins can create/update schools.
+    // Write: Admin OR the school owner (Auth UID == schoolId)
+    // This is critical for publishToPublicDirectory and MigrationService to work!
     match /schools/{schoolId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin() || isOwner(schoolId);
 
       // 2. STUDENTS SUBCOLLECTION
-      // Read: 
-      // - Allow if authenticated (Logged in users)
-      // - Allow public LIST if querying for verification (limited access)
-      //   (Note: Real production apps should use Cloud Functions for sensitive ID lookup to prevent scraping)
+      // Read: Any authenticated user (for student verification)
+      // Write: Admin OR school owner
       match /students/{studentId} {
         allow read: if isAuth() || (request.query.limit <= 1);
-        allow write: if isAdmin();
+        allow write: if isAdmin() || isOwner(schoolId);
       }
 
       // 3. TEACHERS SUBCOLLECTION
       match /teachers/{teacherId} {
         allow read: if isAuth();
-        allow write: if isAdmin(); 
+        allow write: if isAdmin() || isOwner(schoolId);
       }
     }
 
@@ -58,6 +57,16 @@ service cloud.firestore {
     match /settings/{docId} {
       allow read: if true; // Public settings like "Maintenance Mode"
       allow write: if isAdmin();
+    }
+
+    // 5.5 BACKUPS COLLECTION (Explicitly allow owner access)
+    match /backups/{userId} {
+      allow read, write: if isOwner(userId);
+      
+      // Allow access to chunks subcollection
+      match /chunks/{chunkId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // 6. SCHOOL PROFILE (Fix for "Missing Permissions" error)
