@@ -46,9 +46,10 @@
     min-height: 100vh;
     padding: var(--space-6);
     padding-bottom: 80px;
-    overflow-y: auto;
     overflow-x: hidden;
     background-color: var(--bg-main);
+    display: flex;
+    flex-direction: column;
 }
 
 /* Sidebar auto-hide margins responsive */
@@ -67,7 +68,10 @@
 
     .main-content {
         padding: 12px;
-        min-height: auto;
+        min-height: 100vh;
+        /* keep full height so footer stays at bottom */
+        padding-bottom: 140px;
+        /* clear bottom dock + footer */
     }
 
     .sidebar-toggle-btn {
@@ -929,7 +933,6 @@
 /* ===== APP FOOTER ===== */
 .app-footer {
     padding: 0 4px;
-    /* Almost no padding */
     background: rgba(255, 255, 255, 0.98);
     text-align: center;
     position: relative;
@@ -937,6 +940,38 @@
     border-top: 1px solid var(--border-color);
     height: auto;
     min-height: 0;
+    margin-top: auto;
+    /* always push to bottom of flex parent */
+}
+
+/* ── School Profile Logo ── */
+.logo-wrapper {
+    width: 100px;
+    height: 100px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 3px solid var(--border-color, #e5e7eb);
+    cursor: pointer;
+    flex-shrink: 0;
+    background: var(--bg-secondary, #f3f4f6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.logo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--text-soft, #9ca3af);
 }
 
 .footer-row {

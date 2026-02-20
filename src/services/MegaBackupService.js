@@ -16,6 +16,11 @@ async function getStorage() {
 
     console.log('MegaBackup: Connecting...');
     return new Promise((resolve, reject) => {
+        // Timeout after 15 seconds — Mega can hang in browsers
+        const timeout = setTimeout(() => {
+            console.warn('MegaBackup: Login timed out (15s)');
+            reject(new Error('Mega login timed out'));
+        }, 15000);
         try {
             const tempStorage = new Storage({
                 email: MEGA_EMAIL,
@@ -23,16 +28,19 @@ async function getStorage() {
             });
 
             tempStorage.on('ready', () => {
+                clearTimeout(timeout);
                 console.log('MegaBackup: Connected!');
                 storage = tempStorage;
                 resolve(storage);
             });
 
             tempStorage.on('error', (err) => {
+                clearTimeout(timeout);
                 console.error('MegaBackup: Connection Error', err);
                 reject(err);
             });
         } catch (error) {
+            clearTimeout(timeout);
             reject(error);
         }
     });
@@ -108,7 +116,7 @@ export async function uploadToMega(data, schoolName = 'Unknown', schoolId = '000
 
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `backup_${role}_${timestamp}.json`;
-        const buffer = Buffer.from(fileContent);
+        const buffer = new TextEncoder().encode(fileContent);
 
         // 5. Upload
         console.log(`MegaBackup: Uploading ${filename} to ${targetFolder.name}...`);

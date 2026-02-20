@@ -392,6 +392,7 @@ function AppContent() {
                 return <ComponentErrorBoundary componentName="Backup & Restore"><BackupRestore
                     isOpen={true}
                     isFullPage={true}
+                    user={user}
                     onClose={() => setShowMenuContent(false)}
                     ledger={ledger}
                     standards={standards}
@@ -796,7 +797,7 @@ function AppContent() {
                     )}
                 </div>
 
-                {/* Unified Footer Integrated into glass flow */}
+                {/* Unified Footer Integrated into main flow */}
                 <footer className="footer-glass" style={{ marginTop: 'auto', padding: '1rem', textAlign: 'center', opacity: 0.5, fontSize: '0.8rem' }}>
                     <div className="footer-row" style={{ display: 'flex', justifyContent: 'center', gap: '15px', alignItems: 'center' }}>
                         <a href="mailto:help@edunorm.in" style={{ color: 'inherit', textDecoration: 'none' }}>help@edunorm.in</a>
@@ -939,15 +940,17 @@ function AppContent() {
                 }}
             />
 
-            {showAdmin && (
-                <Suspense fallback={<BrandLoader message="Loading Admin Panel..." />}>
-                    <AdminPanel
-                        onClose={() => setShowAdmin(false)}
-                        totalStudents={students.length}
-                        totalStandards={standards?.length || 0}
-                    />
-                </Suspense>
-            )}
+            {
+                showAdmin && (
+                    <Suspense fallback={<BrandLoader message="Loading Admin Panel..." />}>
+                        <AdminPanel
+                            onClose={() => setShowAdmin(false)}
+                            totalStudents={students.length}
+                            totalStandards={standards?.length || 0}
+                        />
+                    </Suspense>
+                )
+            }
 
             <UpgradeModal />
 
@@ -955,7 +958,7 @@ function AppContent() {
             <UndoRedoBar />
             <ToastContainer />
             <OfflineQueue />
-        </div>
+        </div >
     );
 }
 

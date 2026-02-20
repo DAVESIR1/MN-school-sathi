@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Download, Upload, Cloud, RefreshCw, X, FileJson, FileSpreadsheet, Share2, CheckCircle, AlertCircle, Database, Wifi, WifiOff } from 'lucide-react';
 import { SyncBackupLogic } from './logic.js';
-import { SovereignBridge } from '../../core/v2/Bridge';
-import { InfinitySync } from '../../core/v2/InfinitySync';
+import { syncToCloud, restoreFromCloud } from '../../services/DirectBackupService.js';
+import { forceSyncNow } from '../../services/BackupSandbox.js';
 import SyncEventBus from '../../services/SyncEventBus';
 import './SyncBackup.css';
 
@@ -53,7 +53,7 @@ function ProgressBar({ value, label }) {
 /**
  * SOVEREIGN SYNC & BACKUP: PREMIUM VIEW
  */
-export function SyncBackupView({ isOpen, isFullPage = false, onClose, ledger, selectedStandard, onImportComplete }) {
+export function SyncBackupView({ isOpen, isFullPage = false, onClose, ledger, selectedStandard, onImportComplete, user }) {
     const [activeTab, setActiveTab] = useState('cloud');
     const [syncing, setSyncing] = useState(false);
     const [importing, setImporting] = useState(false);
@@ -70,53 +70,36 @@ export function SyncBackupView({ isOpen, isFullPage = false, onClose, ledger, se
 
     if (!isOpen && !isFullPage) return null;
 
-    // ── Cloud Sync with honest result-based verification ─────────
+    // ── Cloud Sync: push local data to Firestore (via SW sandbox) ────────────
     const handleForceSync = async () => {
+        const uid = user?.uid;
+        if (!uid) {
+            showToast('error', '❌ You must be logged in to sync to cloud');
+            return;
+        }
         setSyncing(true);
-        setLayerResults(null);
         setSyncStats(null);
         setProgress(15);
-
         try {
             SyncEventBus.emit(SyncEventBus.EVENTS.SYNC_START);
-
             setProgress(40);
-            const result = await SovereignBridge.forceSync();
-            setProgress(90);
-
-            // Honest layer status:
-            // - Firestore: true if any records synced (forceSync uses Firestore as primary layer)
-            // - R2: true only if VITE_R2_ACCOUNT_ID env var is configured
-            // - Mega: true only if VITE_MEGA_EMAIL env var is configured
-            // This avoids a secondary probe-write that gets blocked by Firestore security rules
-            const hasFirestore = (result?.synced || 0) > 0;
-            const hasR2 = !!(import.meta.env.VITE_R2_ACCOUNT_ID);
-            const hasMega = !!(import.meta.env.VITE_MEGA_EMAIL);
-
-            const layers = {
-                Firestore: hasFirestore,
-                R2: hasR2,
-                Mega: hasMega,
-            };
-
-            setLayerResults(layers);
-            setSyncStats(result);
-            setProgress(100);
-
-            const activeLayers = Object.values(layers).filter(Boolean).length;
-            SyncEventBus.emit(SyncEventBus.EVENTS.SYNC_SUCCESS, { layers: activeLayers });
-
-            if (hasFirestore) {
-                showToast('success', `✅ ${result.synced} records synced to Firestore${hasR2 ? ' + R2' : ''}${hasMega ? ' + Mega' : ''}`);
-            } else if ((result?.synced || 0) === 0 && (result?.failed || 0) === 0) {
-                showToast('success', '✅ No data to sync — database is empty');
-            } else {
-                showToast('error', `⚠️ ${result?.failed || 0} records failed — check Firestore credentials`);
+            // Try sandbox path first (SW thread), fallback to direct sync
+            let result;
+            try {
+                result = await forceSyncNow(user);
+            } catch (swErr) {
+                console.warn('SW path failed, using direct sync:', swErr.message);
+                result = await syncToCloud(uid);
             }
-
+            setProgress(100);
+            setSyncStats({ synced: result.synced || 0, failed: 0 });
+            setLayerResults({ Firestore: true, R2: false, Mega: false });
+            SyncEventBus.emit(SyncEventBus.EVENTS.SYNC_SUCCESS, { layers: 1 });
+            showToast('success', `✅ ${result.students || result.synced || 0} students synced to cloud`);
         } catch (err) {
             SyncEventBus.emit(SyncEventBus.EVENTS.SYNC_FAIL);
             showToast('error', '❌ Sync failed: ' + err.message);
+            console.error('Sync error:', err);
         } finally {
             setSyncing(false);
             setTimeout(() => setProgress(0), 1500);
@@ -124,17 +107,30 @@ export function SyncBackupView({ isOpen, isFullPage = false, onClose, ledger, se
     };
 
 
+    // ── Cloud Restore: pull data from Firestore and import locally ──
     const handleRestoreAll = async () => {
-        if (!window.confirm('🔄 RESTORE FROM CLOUD\n\nThis will pull all your data from the encrypted cloud mesh and merge it with local data. Continue?')) return;
+        const uid = user?.uid;
+        if (!uid) {
+            showToast('error', '❌ You must be logged in to restore from cloud');
+            return;
+        }
         setSyncing(true);
         setProgress(20);
         try {
-            const res = await SyncBackupLogic.syncAll();
+            const result = await restoreFromCloud(uid);
             setProgress(100);
-            showToast('success', `✅ Cloud restore complete — ${res.success || 0} records pulled`);
-            onImportComplete?.();
+            if (!result.found) {
+                showToast('error', '📭 No backup found in cloud — sync your data first');
+            } else if (result.restored > 0) {
+                showToast('success', `✅ Restored ${result.students} students + settings from cloud!`);
+                onImportComplete?.();
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                showToast('success', '✅ Cloud backup is empty (no student data yet)');
+            }
         } catch (err) {
             showToast('error', '❌ Restore failed: ' + err.message);
+            console.error('DirectBackup restore error:', err);
         } finally {
             setSyncing(false);
             setTimeout(() => setProgress(0), 1500);

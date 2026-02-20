@@ -1,15 +1,15 @@
 
-import { doc, setDoc, getDoc, getFirestore } from 'firebase/firestore';
+import { doc, setDoc, getDoc, getDocs, collection, getFirestore } from 'firebase/firestore';
 import { db } from '../../config/firebase.js';
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Storage } from 'megajs';
 import MappingSystem from './MappingSystem.js';
 import SovereignCore from './SovereignCore.js';
 
-// Env Helper
+// Env Helper (browser-safe — no process.env references)
 const getEnv = (key) => {
-    try { return import.meta.env[key] || process.env[key]; }
-    catch (e) { return process.env[key]; }
+    try { return import.meta.env?.[key] || undefined; }
+    catch (e) { return undefined; }
 };
 
 export const InfinitySync = {
@@ -42,12 +42,17 @@ export const InfinitySync = {
         if (this._clients.mega && this._clients.mega.ready) return this._clients.mega;
         const creds = { email: getEnv('VITE_MEGA_EMAIL'), password: getEnv('VITE_MEGA_PASS') };
         if (!creds.email || !creds.password) return null;
+        // Timeout after 15 seconds — Mega login can hang in browsers
         return new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                console.warn('Mega login timed out (15s)');
+                resolve(null);
+            }, 15000);
             try {
                 const s = new Storage(creds);
-                s.on('ready', () => { this._clients.mega = s; resolve(s); });
-                s.on('error', (e) => { console.error("Mega Init Error", e); resolve(null); });
-            } catch (e) { resolve(null); }
+                s.on('ready', () => { clearTimeout(timeout); this._clients.mega = s; resolve(s); });
+                s.on('error', (e) => { clearTimeout(timeout); console.error('Mega Init Error', e); resolve(null); });
+            } catch (e) { clearTimeout(timeout); resolve(null); }
         });
     },
 
@@ -110,11 +115,13 @@ export const InfinitySync = {
     async pushToR2(env) {
         const r2 = await this.getR2Client();
         if (!r2) return false;
+        // Use TextEncoder for browser-compatible Uint8Array body
+        const body = new TextEncoder().encode(JSON.stringify(env));
         const command = new PutObjectCommand({
             Bucket: r2.bucket,
             Key: `v2/${env.header.sid}.enorm`,
-            Body: JSON.stringify(env),
-            ContentType: 'application/enorm'
+            Body: body,
+            ContentType: 'application/json'
         });
         await r2.client.send(command);
         return true;
@@ -200,8 +207,10 @@ export const InfinitySync = {
             const file = v2Folder?.children?.find(f => f.name === `${sid}.enorm`);
             if (!file) return null;
             const buffer = await file.downloadBuffer();
-            return JSON.parse(buffer.toString());
-        } catch (e) { return null; }
+            // Browser-compatible: use TextDecoder instead of Buffer.toString()
+            const text = new TextDecoder().decode(buffer);
+            return JSON.parse(text);
+        } catch (e) { console.warn('pullFromMega failed:', e.message); return null; }
     },
 
     async pullFromFirestore(sid) {
@@ -219,14 +228,24 @@ export const InfinitySync = {
             const res = await r2.client.send(new GetObjectCommand({
                 Bucket: r2.bucket, Key: `v2/${sid}.enorm`
             }));
-            const streamToBuffer = (stream) => new Promise((resolve, reject) => {
-                const chunks = [];
-                stream.on("data", (chunk) => chunks.push(chunk));
-                stream.on("end", () => resolve(Buffer.concat(chunks)));
-            });
-            const buffer = await streamToBuffer(res.Body);
-            return JSON.parse(buffer.toString());
-        } catch (e) { return null; }
+            // Browser-compatible: use Response + text() instead of Node.js streams
+            let text;
+            if (res.Body instanceof ReadableStream) {
+                // Browser: Body is a Web ReadableStream
+                const response = new Response(res.Body);
+                text = await response.text();
+            } else if (res.Body?.transformToString) {
+                // AWS SDK v3 SdkStream helper
+                text = await res.Body.transformToString();
+            } else if (typeof res.Body === 'string') {
+                text = res.Body;
+            } else {
+                // Fallback: try TextDecoder on raw bytes
+                const bytes = new Uint8Array(res.Body);
+                text = new TextDecoder().decode(bytes);
+            }
+            return JSON.parse(text);
+        } catch (e) { console.warn('pullFromR2 failed:', e.message); return null; }
     },
 
     async triggerLifePod(data) {
@@ -290,6 +309,41 @@ export const InfinitySync = {
             stats[tag] = (stats[tag] || 0) + 1;
         }
         return stats;
+    },
+
+    /**
+     * BULK PULL: Fetch ALL sovereign records from Firestore
+     * Decrypts each body and returns plain objects ready for local import.
+     */
+    async pullAllFromFirestore() {
+        const dbInstance = await this.getFirestore();
+        if (!dbInstance) throw new Error("Firestore not available — check Firebase config");
+
+        console.log('📥 Pulling ALL records from Firestore sovereign_data...');
+        const snap = await getDocs(collection(dbInstance, 'sovereign_data'));
+
+        if (snap.empty) {
+            console.log('📥 No records found in cloud.');
+            return [];
+        }
+
+        const records = [];
+        for (const docSnap of snap.docs) {
+            try {
+                const env = docSnap.data();
+                if (!env?.body) continue;
+
+                // Decrypt the body
+                const clearText = SovereignCore.decrypt(env.body);
+                const parsed = JSON.parse(clearText);
+                records.push(parsed);
+            } catch (e) {
+                console.warn(`Skipped record ${docSnap.id}: decrypt failed`, e.message);
+            }
+        }
+
+        console.log(`📥 Pulled ${records.length} records from Firestore (${snap.size} total docs)`);
+        return records;
     }
 };
 

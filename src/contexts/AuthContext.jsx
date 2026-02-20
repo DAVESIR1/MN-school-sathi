@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseConfigured } from '../config/firebase';
 import { logSecurityEvent } from '../services/SecurityManager';
+import AppBus, { APP_EVENTS } from '../core/AppBus.js';
 
 const AuthContext = createContext(null);
 
@@ -85,11 +86,13 @@ export function AuthProvider({ children }) {
                                 (async () => {
                                     try {
                                         const { SovereignBridge } = await import('../core/v2/Bridge.js');
-                                        const { exportAllData } = await import('../services/database');
-                                        const allData = await exportAllData();
                                         console.log('Sovereign: Starting one-time background migration...');
-                                        await SovereignBridge.migrate([allData], 'total_migration');
-                                        localStorage.setItem(migrationKey, Date.now().toString());
+                                        // Use forceSync which properly iterates students + settings individually
+                                        const result = await SovereignBridge.forceSync();
+                                        console.log('Sovereign: Migration complete:', result);
+                                        if (result && result.synced > 0) {
+                                            localStorage.setItem(migrationKey, Date.now().toString());
+                                        }
                                     } catch (e) {
                                         console.warn('Sovereign: Background migration failed', e);
                                     }
@@ -101,9 +104,25 @@ export function AuthProvider({ children }) {
                     }
                 }
 
-                setUser({ ...firebaseUser, ...userProfile, isAdmin });
+                const enrichedUser = { ...firebaseUser, ...userProfile, isAdmin };
+                setUser(enrichedUser);
+
+                // Broadcast login to all features via AppBus
+                AppBus.emit(APP_EVENTS.USER_LOGGED_IN, { user: enrichedUser });
+
+                // Wire auto-backup: any data save event triggers a queued backup
+                (async () => {
+                    try {
+                        const RegistryMod = await import('../core/FeatureRegistry.js');
+                        const { queueBackup } = await import('../services/BackupSandbox.js');
+                        RegistryMod.default.setAutoBackupHandler(() => queueBackup(enrichedUser).catch(console.warn));
+                    } catch (e) {
+                        console.warn('[AuthContext] Auto-backup wiring skipped:', e.message);
+                    }
+                })();
             } else {
                 setUser(null);
+                AppBus.emit(APP_EVENTS.USER_LOGGED_OUT, {});
             }
             setLoading(false);
         });

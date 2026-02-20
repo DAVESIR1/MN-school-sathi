@@ -398,7 +398,12 @@ export async function importAllData(data) {
             let count = 0;
 
             for (const incoming of data.students) {
-                if (!incoming.grNo) continue;
+                // Normalise grNo — cloud-restored records may use gr_no
+                if (!incoming.grNo && incoming.gr_no) incoming.grNo = String(incoming.gr_no).trim();
+                if (!incoming.grNo) {
+                    console.warn('importAllData: Skipping student with no grNo', incoming);
+                    continue;
+                }
                 const grKey = String(incoming.grNo).trim();
                 if (studentMap.has(grKey)) {
                     const existing = studentMap.get(grKey);

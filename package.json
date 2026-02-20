@@ -28,7 +28,9 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@vitejs/plugin-react": "^4.2.0",
+    "eslint": "^10.0.1",
     "vite": "^5.0.0",
     "vite-plugin-node-polyfills": "^0.25.0"
   }

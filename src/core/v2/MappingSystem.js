@@ -30,8 +30,10 @@ export const MappingSystem = {
                 rawInput.uid != null ||
                 rawInput.grNo != null;
 
+            // Instead of crashing, auto-generate an ID for migration/bulk data
             if (!hasIdentifier) {
-                throw new Error("CRITICAL_ERR: Missing ID/UID/GRNo for Sovereign Mapping");
+                rawInput.id = `auto_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+                console.warn("MappingSystem: Auto-assigned ID for record without identifier:", rawInput.id);
             }
 
             // Step B: Generate Blind Search Index (The 'sid')

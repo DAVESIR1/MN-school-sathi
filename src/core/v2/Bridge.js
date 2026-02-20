@@ -92,54 +92,121 @@ export const SovereignBridge = {
     /**
      * Force Synchronization
      * Manually triggers a full tri-layer sync.
-     * Uses static named imports to avoid the dynamic-import default-export crash.
      */
     async forceSync() {
-        // Use named exports directly — database.js has no default export
-        const { exportAllData, importAllData } = await import('../../services/database');
+        const { exportAllData } = await import('../../services/database');
         const data = await exportAllData();
 
         if (!data) throw new Error('exportAllData returned nothing — IndexedDB may be empty.');
 
         const yieldToMain = () => new Promise(resolve => setTimeout(resolve, 0));
-
-        console.log(`🚀 SovereignBridge: Starting Force Sync (${data.students?.length || 0} students)...`);
-
         let syncCount = 0;
         let failCount = 0;
 
-        if (data.settings && data.settings.length > 0) {
-            try {
-                // Must pass type:'settings' so MappingSystem bypasses the ID check
-                await this.save('settings', {
-                    type: 'settings',
-                    id: 'school_settings',
-                    settings: data.settings
-                });
-                syncCount++;
-            } catch (e) {
-                console.warn('Settings sync warning:', e.message);
-                failCount++;
-            }
+        const safeSave = async (type, payload) => {
+            try { await this.save(type, payload); syncCount++; }
+            catch (e) { console.warn(`Sync failed [${type}]:`, e.message); failCount++; }
+        };
+
+        console.log(`🚀 SovereignBridge.forceSync: ${data.students?.length || 0} students, ${data.standards?.length || 0} standards, ${data.settings?.length || 0} settings`);
+
+        // 1. Settings (single envelope)
+        if (data.settings?.length > 0) {
+            await safeSave('settings', { type: 'settings', id: 'school_settings', settings: data.settings });
             await yieldToMain();
         }
 
-        if (data.students && data.students.length > 0) {
+        // 2. Standards (single envelope)
+        if (data.standards?.length > 0) {
+            await safeSave('standards', { type: 'standards', id: 'school_standards', standards: data.standards });
+            await yieldToMain();
+        }
+
+        // 3. Custom Fields (single envelope)
+        if (data.customFields?.length > 0) {
+            await safeSave('customFields', { type: 'customFields', id: 'school_customFields', customFields: data.customFields });
+            await yieldToMain();
+        }
+
+        // 4. Students (batched, 10 at a time)
+        if (data.students?.length > 0) {
             for (let i = 0; i < data.students.length; i += 10) {
                 const chunk = data.students.slice(i, i + 10);
-                // Tag each student with type:'student' so MappingSystem knows how to handle it
                 const results = await Promise.allSettled(
-                    chunk.map(s => this.save('student', { ...s, type: s.type || 'student' }))
+                    chunk.map(s => this.save('student', { ...s, type: 'student' }))
                 );
                 syncCount += results.filter(r => r.status === 'fulfilled').length;
                 failCount += results.filter(r => r.status === 'rejected').length;
                 await yieldToMain();
-                if (i % 50 === 0 && i > 0) console.log(`Syncing: ${i}/${data.students.length}...`);
             }
         }
 
-        console.log(`✅ SovereignBridge: Force Sync Complete. ${syncCount} synced, ${failCount} failed.`);
+        console.log(`✅ SovereignBridge.forceSync done. synced=${syncCount}, failed=${failCount}`);
         return { synced: syncCount, failed: failCount };
+    },
+
+    /**
+     * Restore from Cloud
+     * Pulls ALL encrypted records from Firestore, decrypts them,
+     * and imports into local IndexedDB.
+     */
+    async restoreFromCloud() {
+        console.log('🔄 SovereignBridge.restoreFromCloud: Starting...');
+
+        const records = await InfinitySync.pullAllFromFirestore();
+
+        if (!records || records.length === 0) {
+            console.log('📥 No cloud records found.');
+            return { restored: 0, skipped: 0 };
+        }
+
+        const students = [];
+        const settings = [];
+        const standards = [];
+        const customFields = [];
+        let skipped = 0;
+
+        for (const record of records) {
+            if (!record || typeof record !== 'object') { skipped++; continue; }
+
+            const t = record.type;
+
+            if (t === 'settings' && Array.isArray(record.settings)) {
+                settings.push(...record.settings);
+            } else if (t === 'standards' && Array.isArray(record.standards)) {
+                standards.push(...record.standards);
+            } else if (t === 'customFields' && Array.isArray(record.customFields)) {
+                customFields.push(...record.customFields);
+            } else if (t === 'student') {
+                // Normalise grNo — some records store it as gr_no
+                const { type, ...studentData } = record;
+                if (!studentData.grNo && studentData.gr_no) studentData.grNo = studentData.gr_no;
+                students.push(studentData);
+            } else {
+                // Unknown — try to detect by shape
+                if (record.settings) settings.push(...(Array.isArray(record.settings) ? record.settings : [record]));
+                else if (record.standards) standards.push(...(Array.isArray(record.standards) ? record.standards : [record]));
+                else if (record.grNo || record.gr_no || record.name) {
+                    const { type, ...sd } = record;
+                    if (!sd.grNo && sd.gr_no) sd.grNo = sd.gr_no;
+                    students.push(sd);
+                } else { skipped++; }
+            }
+        }
+
+        console.log(`📥 Parsed: ${students.length} students, ${settings.length} settings, ${standards.length} standards, ${customFields.length} customFields, ${skipped} skipped`);
+
+        const { importAllData } = await import('../../services/database');
+        await importAllData({
+            students: students.length > 0 ? students : undefined,
+            settings: settings.length > 0 ? settings : undefined,
+            standards: standards.length > 0 ? standards : undefined,
+            customFields: customFields.length > 0 ? customFields : undefined,
+        });
+
+        const total = students.length + settings.length + standards.length + customFields.length;
+        console.log(`✅ SovereignBridge.restoreFromCloud: ${total} records imported.`);
+        return { restored: total, skipped };
     },
 
 

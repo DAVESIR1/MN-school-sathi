@@ -4,13 +4,10 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { Storage } from 'megajs';
 import MappingSystem from './MappingSystem.js';
 
-// Env Helper: Supports both Vite (import.meta.env) and Node (process.env)
+// Env Helper (browser-safe — no process.env references)
 const getEnv = (key) => {
-    try {
-        return import.meta.env[key] || process.env[key];
-    } catch (e) {
-        return process.env[key];
-    }
+    try { return import.meta.env?.[key] || undefined; }
+    catch (e) { return undefined; }
 };
 
 export const SovereignSync = {
@@ -134,8 +131,8 @@ export const SovereignSync = {
             let v2Folder = mega.root.children?.find(f => f.name === 'EduNorm_V2');
             if (!v2Folder) v2Folder = await mega.root.mkdir('EduNorm_V2');
 
-            const buffer = Buffer.from(JSON.stringify(env));
-            await v2Folder.upload(`${env.header.sid}.enorm`, buffer).complete;
+            const encoded = new TextEncoder().encode(JSON.stringify(env));
+            await v2Folder.upload(`${env.header.sid}.enorm`, encoded).complete;
             return true;
         } catch (e) {
             console.warn("L3 (Mega) Sync Failed", e.message);
