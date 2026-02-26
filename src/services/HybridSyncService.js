@@ -344,20 +344,26 @@ async function backupAllToDrive(data, schoolCode) {
 }
 
 async function restoreAllFromDrive(schoolCode) {
-    if (!isDriveHealthy()) return null;
+    if (!isDriveAvailable()) return null; // Only check if available (has token), ignore session disable for manual restore
     const drive = await getDriveService();
     if (!drive.isAuthenticated()) return null;
     // Validate token before making API calls
     if (!(await drive.validateToken())) {
+        console.warn('🔥 Phoenix Drive: Token revoked during restore attempt — disabled for this session.');
         _driveDisabledForSession = true;
         return null;
     }
     try {
         const tree = await drive.getSchoolFolderTree(schoolCode);
+        console.log(`🧬 Phoenix: Searching for backup in folder ${tree.school} (School_${schoolCode})`);
         const files = await drive.listFiles(tree.school, 'database.json');
-        if (!files.length) return null;
+        if (!files.length) {
+            console.warn(`🧬 Phoenix: No database.json found in ${tree.school}`);
+            return null;
+        }
         const res = await drive.downloadFile(files[0].id);
         const data = await res.json();
+        console.log(`🧬 Phoenix: Found backup with ${data.students?.length || 0} students. Re-attaching photos...`);
 
         // Re-attach photos
         const photoFiles = await drive.listFiles(tree.photos);

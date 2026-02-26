@@ -3,10 +3,7 @@
  * Handles: Auth, organized folder structure, file upload/download, search
  */
 
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY || '';
 const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
 const API_BASE = 'https://www.googleapis.com';
 
 let tokenClient = null;
@@ -68,8 +65,9 @@ export async function loadGoogleScripts() {
             s.onload = () => {
                 window.gapi.load('client', async () => {
                     try {
+                        const apiKey = import.meta.env.VITE_GOOGLE_API_KEY;
                         // Don't load discovery doc — we use direct REST fetch, not gapi.client
-                        await window.gapi.client.init({ apiKey: API_KEY });
+                        await window.gapi.client.init({ apiKey });
                         gapiLoaded = true;
                         check();
                     } catch (e) { reject(e); }
@@ -93,7 +91,7 @@ export async function loadGoogleScripts() {
 export function initTokenClient(onSuccess, onError) {
     if (!window.google?.accounts?.oauth2) { onError?.(new Error('GIS not loaded')); return; }
     tokenClient = window.google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
         scope: SCOPES,
         callback: (r) => {
             if (r.error) { onError?.(r); }
@@ -173,20 +171,23 @@ export async function getSchoolFolderTree(schoolCode = 'default') {
 
 /**
  * Upload or update a file (JSON, image, PDF, etc.)
- * If PATCH fails (file owned by different client), falls back to POST (create new).
+ * If file isn't editable (owned by different client), skips PATCH and creates new.
+ * This prevents the red 403 console error from even firing.
  */
 export async function uploadFile(name, content, mimeType, folderId) {
     const h = headers();
     const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
 
-    // Check if file already exists in this folder (search may fail — that's OK)
+    // Check if file already exists and if we can edit it
     let existingFileId = null;
+    let canEdit = false;
     try {
         const q = encodeURIComponent(`name='${name}' and '${folderId}' in parents and trashed=false`);
-        const search = await fetch(`${API_BASE}/drive/v3/files?q=${q}&fields=files(id)`, { headers: h });
+        const search = await fetch(`${API_BASE}/drive/v3/files?q=${q}&fields=files(id,capabilities/canEdit)`, { headers: h });
         if (search.ok) {
             const sd = await search.json();
             existingFileId = sd.files?.[0]?.id || null;
+            canEdit = sd.files?.[0]?.capabilities?.canEdit || false;
         }
     } catch { /* search failed — we'll create new */ }
 
@@ -195,18 +196,23 @@ export async function uploadFile(name, content, mimeType, folderId) {
     form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
     form.append('file', blob);
 
-    // Try PATCH (update existing) first, fallback to POST (create new) on 403
-    if (existingFileId) {
-        const patchRes = await fetch(`${API_BASE}/upload/drive/v3/files/${existingFileId}?uploadType=multipart`, {
-            method: 'PATCH', headers: h, body: form,
-        });
-        if (patchRes.ok) return await patchRes.json();
+    // Only try PATCH if we KNOW we can edit it — this prevents the red 403 console error
+    if (existingFileId && canEdit) {
+        try {
+            const patchRes = await fetch(`${API_BASE}/upload/drive/v3/files/${existingFileId}?uploadType=multipart`, {
+                method: 'PATCH', headers: h, body: form,
+            });
+            if (patchRes.ok) return await patchRes.json();
 
-        // PATCH failed — if 403, the file was created by another client
-        // Fall through to POST (create new file)
-        if (patchRes.status !== 403 && patchRes.status !== 401) {
-            throw new Error(`Upload failed: ${patchRes.status} ${patchRes.statusText}`);
+            // If PATCH still fails with 403, fall through to POST (create new)
+            if (patchRes.status !== 403 && patchRes.status !== 401) {
+                throw new Error(`Upload failed: ${patchRes.status} ${patchRes.statusText}`);
+            }
+        } catch (e) {
+            if (e.message.includes('401')) throw e;
+            // Otherwise fall through to POST
         }
+
         // Rebuild form for POST (FormData can only be consumed once)
         const form2 = new FormData();
         form2.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
@@ -222,7 +228,7 @@ export async function uploadFile(name, content, mimeType, folderId) {
         throw new Error(`Upload failed: ${postRes.status} ${postRes.statusText}`);
     }
 
-    // No existing file — create new
+    // No existing file or no permission to edit — create new using POST
     const res = await fetch(`${API_BASE}/upload/drive/v3/files?uploadType=multipart`, {
         method: 'POST', headers: h, body: form,
     });

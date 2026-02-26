@@ -463,7 +463,7 @@ export async function importAllData(data) {
                     if (s.gr_no && !s.grNo) s.grNo = s.gr_no;
                     studentMap.set(grKey, s);
                 }
-                if (++count % 500 === 0) await yieldToMain();
+                if (++count % 25 === 0) await yieldToMain();
             }
 
             console.log(`importAllData: Deduplicated to ${studentMap.size} unique students.`);
@@ -498,7 +498,7 @@ export async function importAllData(data) {
                 }
                 await tx.done;
                 await yieldToMain();
-                console.log(`importAllData: Processed ${i + chunk.length}/${entries.length} students...`);
+                if (i % 250 === 0) console.log(`importAllData: Processed ${i + chunk.length}/${entries.length} students...`);
             }
         }
 

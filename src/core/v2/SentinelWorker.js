@@ -9,6 +9,8 @@ let lastHeartbeat = Date.now();
 let checkInterval = null;
 let _warnedThisCycle = false; // Only warn once per freeze
 
+const FREEZE_THRESHOLD = 75000;    // Warn only if frozen > 75s (Phoenix sync can be heavy)
+
 self.onmessage = (e) => {
     if (e.data.type === 'HEARTBEAT') {
         lastHeartbeat = Date.now();
@@ -28,11 +30,11 @@ function startWatchdog() {
         const now = Date.now();
         const diff = now - lastHeartbeat;
 
-        // Only flag if truly frozen (>45 seconds with no heartbeat) and only once
-        if (diff > 45000 && !_warnedThisCycle) {
+        // Only flag if truly frozen (>75 seconds with no heartbeat) and only once
+        if (diff > FREEZE_THRESHOLD && !_warnedThisCycle) {
             console.warn("🛡️ Sentinel: Main thread may be unresponsive (>" + Math.round(diff / 1000) + "s).");
             self.postMessage({ type: 'CRITICAL_FAILURE', reason: 'UNRESPONSIVE' });
             _warnedThisCycle = true; // Don't spam
         }
-    }, 20000); // Check every 20s instead of 15s
+    }, 30000); // Check every 30s instead of 20s
 }
